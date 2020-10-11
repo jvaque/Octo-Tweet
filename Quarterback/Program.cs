@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Quarterback
 {
@@ -6,7 +7,15 @@ namespace Quarterback
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureServices((context, services) =>
+                {
+                    services.AddTransient<IGreetingService, GreetingService>();
+                })
+                .Build();
+
+            var svc = ActivatorUtilities.CreateInstance<GreetingService>(host.Services);
+            svc.Run();
         }
     }
 }
