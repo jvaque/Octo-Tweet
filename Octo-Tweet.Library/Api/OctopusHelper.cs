@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Octo_Tweet.Library.Models;
+﻿using Octo_Tweet.Library.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -10,20 +9,15 @@ namespace Octo_Tweet.Library.Api
 {
     public class OctopusHelper : IOctopusHelper
     {
-        private readonly IConfiguration _config;
         private readonly IAPIHelper _apiHelper;
 
-        public OctopusHelper(IConfiguration config, IAPIHelper apiHelper)
+        public OctopusHelper(IAPIHelper apiHelper)
         {
-            _config = config;
             _apiHelper = apiHelper;
         }
 
-        public async Task<ElectricityModel> GetElectricityConsumption()
+        public async Task<ElectricityModel> GetElectricityConsumption(string electricityMPAN, string electricitySerialNumber)
         {
-            string electricityMPAN = _config.GetValue<string>("OctopusApi:Electricity:mpan");
-            string electricitySerialNumber = _config.GetValue<string>("OctopusApi:Electricity:serial_number");
-
             using (HttpResponseMessage response = await _apiHelper.ApiClient.GetAsync($"/v1/electricity-meter-points/{ electricityMPAN }/meters/{ electricitySerialNumber }/consumption/"))
             {
                 if (response.IsSuccessStatusCode)
@@ -38,11 +32,8 @@ namespace Octo_Tweet.Library.Api
             }
         }
 
-        public async Task<GasModel> GetGasConsumption()
+        public async Task<GasModel> GetGasConsumption(string gasMPAN, string gasSerialNumber)
         {
-            string gasMPAN = _config.GetValue<string>("OctopusApi:Gas:mpan");
-            string gasSerialNumber = _config.GetValue<string>("OctopusApi:Gas:serial_number");
-
             using (HttpResponseMessage response = await _apiHelper.ApiClient.GetAsync($"/v1/gas-meter-points/{ gasMPAN }/meters/{ gasSerialNumber }/consumption/"))
             {
                 if (response.IsSuccessStatusCode)
