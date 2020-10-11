@@ -10,12 +10,14 @@ namespace Quarterback
     public class StartService : IStartService
     {
         private readonly IConfiguration _config;
-        private readonly IOctopusHelper _octopusHelper;
+        private readonly IOctopusElectricityHelper _octopusElectricityHelper;
+        private readonly IOctopusGasHelper _octopusGasHelper;
 
-        public StartService(IConfiguration config, IOctopusHelper octopusHelper)
+        public StartService(IConfiguration config, IOctopusElectricityHelper octopusElectricityHelper, IOctopusGasHelper octopusGasHelper)
         {
             _config = config;
-            _octopusHelper = octopusHelper;
+            _octopusElectricityHelper = octopusElectricityHelper;
+            _octopusGasHelper = octopusGasHelper;
         }
 
         public async Task Run()
@@ -23,12 +25,12 @@ namespace Quarterback
             string electricityMPAN = _config.GetValue<string>("OctopusApi:Electricity:mpan");
             string electricitySerialNumber = _config.GetValue<string>("OctopusApi:Electricity:serial_number");
 
-            var electricityUse = await _octopusHelper.GetElectricityConsumption(electricityMPAN, electricitySerialNumber);
+            var electricityUse = await _octopusElectricityHelper.GetConsumption(electricityMPAN, electricitySerialNumber);
 
             string gasMPAN = _config.GetValue<string>("OctopusApi:Gas:mpan");
             string gasSerialNumber = _config.GetValue<string>("OctopusApi:Gas:serial_number");
 
-            var gasUse = await _octopusHelper.GetGasConsumption(gasMPAN, gasSerialNumber);
+            var gasUse = await _octopusGasHelper.GetConsumption(gasMPAN, gasSerialNumber);
         }
     }
 }

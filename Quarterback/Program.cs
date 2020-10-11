@@ -14,7 +14,8 @@ namespace Quarterback
                 {
                     services.AddSingleton<IAPIHelper, APIHelper>();
 
-                    services.AddTransient<IOctopusHelper, OctopusHelper>();
+                    services.AddTransient<IOctopusElectricityHelper, OctopusElectricityHelper>();
+                    services.AddTransient<IOctopusGasHelper, OctopusGasHelper>();
 
                     services.AddTransient<IStartService, StartService>();
                 })
