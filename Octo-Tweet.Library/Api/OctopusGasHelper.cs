@@ -31,5 +31,20 @@ namespace Octo_Tweet.Library.Api
                 }
             }
         }
+        public async Task<GasModel> GetConsumptionPage(double page, string mpan, string serialNumber)
+        {
+            using (HttpResponseMessage response = await _apiHelper.ApiClient.GetAsync($"/v1/gas-meter-points/{ mpan }/meters/{ serialNumber }/consumption/?page={ page }"))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsAsync<GasModel>();
+                    return result;
+                }
+                else
+                {
+                    throw new Exception(response.ReasonPhrase);
+                }
+            }
+        }
     }
 }
