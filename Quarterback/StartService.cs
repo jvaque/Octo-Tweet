@@ -28,25 +28,25 @@ namespace Quarterback
 
             ElectricityModel electricityUse = await _octopusElectricityHelper.GetConsumption(electricityMPAN, electricitySerialNumber);
 
-            List<ConsumptionDetail> allHistoryElectricityUse = await AllHistoryElectricity(electricityUse.Count);
+            List<ElectricityModel> allHistoryElectricityUse = await AllHistoryElectricity(electricityUse.Count);
 
             string gasMPAN = _config.GetValue<string>("OctopusApi:Gas:mpan");
             string gasSerialNumber = _config.GetValue<string>("OctopusApi:Gas:serial_number");
 
             GasModel gasUse = await _octopusGasHelper.GetConsumption(gasMPAN, gasSerialNumber);
 
-            List<ConsumptionDetail> allHistoryGasUse = await AllHistoryGas(gasUse.Count);
+            List<GasModel> allHistoryGasUse = await AllHistoryGas(gasUse.Count);
 
         }
 
-        private async Task<List<ConsumptionDetail>> AllHistoryElectricity(double useCount)
+        private async Task<List<ElectricityModel>> AllHistoryElectricity(double useCount)
         {
             string electricityMPAN = _config.GetValue<string>("OctopusApi:Electricity:mpan");
             string electricitySerialNumber = _config.GetValue<string>("OctopusApi:Electricity:serial_number");
 
             double electricityPages = Math.Ceiling(useCount / 100d);
 
-            List<ConsumptionDetail> electricityHistory = new List<ConsumptionDetail>();
+            List<ElectricityModel> electricityHistory = new List<ElectricityModel>();
             List<Task<ElectricityModel>> tasks = new List<Task<ElectricityModel>>();
 
             for (int page = 1; page < (electricityPages + 1); page++)
@@ -57,20 +57,20 @@ namespace Quarterback
             var results = await Task.WhenAll(tasks);
             foreach (var item in results)
             {
-                electricityHistory.AddRange(item.Results);
+                electricityHistory.Add(item);
             }
 
             return electricityHistory;
         }
 
-        private async Task<List<ConsumptionDetail>> AllHistoryGas(double useCount)
+        private async Task<List<GasModel>> AllHistoryGas(double useCount)
         {
             string gasMPAN = _config.GetValue<string>("OctopusApi:Gas:mpan");
             string gasSerialNumber = _config.GetValue<string>("OctopusApi:Gas:serial_number");
 
             double gasPages = Math.Ceiling(useCount / 100d);
 
-            List<ConsumptionDetail> gasHistory = new List<ConsumptionDetail>();
+            List<GasModel> gasHistory = new List<GasModel>();
             List<Task<GasModel>> task = new List<Task<GasModel>>();
 
             for (int page = 1; page < (gasPages + 1); page++)
@@ -81,7 +81,7 @@ namespace Quarterback
             var results = await Task.WhenAll(task);
             foreach (var item in results)
             {
-                gasHistory.AddRange(item.Results);
+                gasHistory.Add(item);
             }
 
             return gasHistory;
