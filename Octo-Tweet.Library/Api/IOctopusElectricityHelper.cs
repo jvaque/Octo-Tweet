@@ -1,5 +1,4 @@
 ﻿using Octo_Tweet.Library.Models;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Octo_Tweet.Library.Api

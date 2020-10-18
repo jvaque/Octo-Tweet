@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quarterback", "Quarterback\Quarterback.csproj", "{6AD3854E-FA15-4A9C-A0B5-FC9DDF18C158}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quarterback", "Quarterback\Quarterback.csproj", "{6AD3854E-FA15-4A9C-A0B5-FC9DDF18C158}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Octo-Tweet.Library", "Octo-Tweet.Library\Octo-Tweet.Library.csproj", "{0B1B6821-8A2E-4060-956D-EBFC940DE7B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Octo-Tweet.Library", "Octo-Tweet.Library\Octo-Tweet.Library.csproj", "{0B1B6821-8A2E-4060-956D-EBFC940DE7B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseData.Library", "DatabaseData.Library\DatabaseData.Library.csproj", "{7B9E7A6C-FB9B-49CB-8601-5F201D61CE5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{0B1B6821-8A2E-4060-956D-EBFC940DE7B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B1B6821-8A2E-4060-956D-EBFC940DE7B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B1B6821-8A2E-4060-956D-EBFC940DE7B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B9E7A6C-FB9B-49CB-8601-5F201D61CE5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B9E7A6C-FB9B-49CB-8601-5F201D61CE5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B9E7A6C-FB9B-49CB-8601-5F201D61CE5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B9E7A6C-FB9B-49CB-8601-5F201D61CE5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
