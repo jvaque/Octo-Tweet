@@ -14,13 +14,13 @@ namespace Octo_Tweet.Library.Api
             _apiHelper = apiHelper;
         }
 
-        public async Task<ElectricityModel> GetConsumption(string mpan, string serialNumber)
+        public async Task<ApiElectricityModel> GetConsumption(string mpan, string serialNumber)
         {
             using (HttpResponseMessage response = await _apiHelper.ApiClient.GetAsync($"/v1/electricity-meter-points/{ mpan }/meters/{ serialNumber }/consumption/"))
             {
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadAsAsync<ElectricityModel>();
+                    var result = await response.Content.ReadAsAsync<ApiElectricityModel>();
                     return result;
                 }
                 else
@@ -30,13 +30,13 @@ namespace Octo_Tweet.Library.Api
             }
         }
 
-        public async Task<ElectricityModel> GetConsumptionPage(double page, string mpan, string serialNumber)
+        public async Task<ApiElectricityModel> GetConsumptionPage(double page, string mpan, string serialNumber)
         {
             using (HttpResponseMessage response = await _apiHelper.ApiClient.GetAsync($"/v1/electricity-meter-points/{ mpan }/meters/{ serialNumber }/consumption/?page={ page }"))
             {
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadAsAsync<ElectricityModel>();
+                    var result = await response.Content.ReadAsAsync<ApiElectricityModel>();
                     return result;
                 }
                 else

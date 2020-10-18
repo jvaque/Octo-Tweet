@@ -2,7 +2,7 @@
 
 namespace Octo_Tweet.Library.Models
 {
-    public class GasModel
+    public class ApiElectricityModel
     {
         public int Count { get; set; }
         public ConsumptionDetail[] Results { get; set; }
