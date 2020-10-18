@@ -8,7 +8,9 @@ CREATE TABLE IF NOT EXISTS octo_tweet.Electricity (
 
     PRIMARY KEY (electricity_id),
     INDEX (electricity_interval_start_datetime),
-    INDEX (electricity_interval_end_datetime)
+    INDEX (electricity_interval_end_datetime),
+    UNIQUE KEY UC_electricity_interval_start_datetime (electricity_interval_start_datetime),
+    UNIQUE KEY UC_electricity_interval_end_datetime (electricity_interval_end_datetime)
 ) AUTO_INCREMENT = 1000;
 
 -- Engine and charset????

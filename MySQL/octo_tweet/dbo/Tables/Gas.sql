@@ -8,5 +8,7 @@ CREATE TABLE IF NOT EXISTS octo_tweet.Gas (
     
     PRIMARY KEY (gas_id),
     INDEX (gas_interval_start_datetime),
-    INDEX (gas_interval_end_datetime)
+    INDEX (gas_interval_end_datetime),
+    UNIQUE KEY UC_gas_interval_start_datetime (gas_interval_start_datetime),
+    UNIQUE KEY UC_gas_interval_end_datetime (gas_interval_end_datetime)
 ) AUTO_INCREMENT = 1000;
