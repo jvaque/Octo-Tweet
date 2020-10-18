@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Octo-Tweet.Library", "Octo-
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseData.Library", "DatabaseData.Library\DatabaseData.Library.csproj", "{7B9E7A6C-FB9B-49CB-8601-5F201D61CE5B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Octo-Tweet.Data.Libary", "Octo-Tweet.Data.Libary\Octo-Tweet.Data.Libary.csproj", "{6C609A4F-AC2C-4CDE-8AA7-7CC61E39F720}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{7B9E7A6C-FB9B-49CB-8601-5F201D61CE5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B9E7A6C-FB9B-49CB-8601-5F201D61CE5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B9E7A6C-FB9B-49CB-8601-5F201D61CE5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C609A4F-AC2C-4CDE-8AA7-7CC61E39F720}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C609A4F-AC2C-4CDE-8AA7-7CC61E39F720}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C609A4F-AC2C-4CDE-8AA7-7CC61E39F720}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C609A4F-AC2C-4CDE-8AA7-7CC61E39F720}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

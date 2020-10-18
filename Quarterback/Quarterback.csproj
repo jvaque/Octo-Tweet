@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DatabaseData.Library\DatabaseData.Library.csproj" />
+    <ProjectReference Include="..\Octo-Tweet.Data.Libary\Octo-Tweet.Data.Libary.csproj" />
     <ProjectReference Include="..\Octo-Tweet.Library\Octo-Tweet.Library.csproj" />
   </ItemGroup>
 

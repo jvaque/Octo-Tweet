@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using DatabaseData.Library;
 using Octo_Tweet.Library.Api;
 using System.Threading.Tasks;
+using Octo_Tweet.Data.Libary.DataAccess;
 
 namespace Quarterback
 {
@@ -22,8 +23,9 @@ namespace Quarterback
                     // DatabaseData.Libary
                     services.AddTransient<IMySqlDataAccess, MySqlDataAccess>();
 
-                    // otherproject.library
-                    //services.AddTransient<IUserData, UserData>();
+                    // Octo-Tweet.Data.Library
+                    services.AddTransient<IElectricity, Electricity>();
+                    services.AddTransient<IGas, Gas>();
 
                     services.AddTransient<IStartService, StartService>();
                 })
