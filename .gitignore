@@ -351,3 +351,12 @@ MigrationBackup/
 
 # File created by the Database Builder python script
 migrations.sql
+
+# Python Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
