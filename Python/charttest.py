@@ -1,4 +1,5 @@
 # import matplotlib
+import numpy as np
 from matplotlib import pyplot, dates
 from datetime import datetime
 import csv
@@ -26,25 +27,30 @@ with open('data2electricBoogaloo.csv') as csv_file:
         listOfUse.append([row[0], row[1], datetimeFrom, datetimeTo])
 
 energyList = []
-counterList = []
+timeList = []
 
 for element in listOfUse:
     energyList.append(float(element[1]))
-    counterList.append(dates.date2num(element[2]))
+    timeList.append(dates.date2num(element[2]))
 
 # datetimeFromTimestamp = datetime.fromisoformat("2020-09-23 01:00:00+00:00:00")
 # print(datetimeFromTimestamp)
 
-pyplot.bar(counterList, energyList, color='#444444')
-pyplot.plot(counterList, energyList, color='#0000ff', marker='.')
+x_indexes = np.arange(len(timeList))
 
+
+pyplot.bar(x_indexes, energyList, color='#babae8')
+# pyplot.plot(x_indexes, energyList, color='#0000ff', marker='.')
+
+pyplot.xticks(ticks=x_indexes, labels=timeList)
+
+pyplot.title('24th Sept 2020')
 pyplot.xlabel('Time of day (h)')
 pyplot.ylabel('Energy Consumption (kWh)')
-pyplot.title('24th Sept 2020')
 
 # pyplot.legend()
 
-pyplot.grid(True)
+# pyplot.grid(True)
 
 pyplot.savefig('plot.png')
 
