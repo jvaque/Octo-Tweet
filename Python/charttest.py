@@ -1,6 +1,7 @@
 # import matplotlib
 import numpy as np
-from matplotlib import pyplot, dates
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from datetime import datetime
 import csv
 
@@ -28,13 +29,13 @@ with open('data2electricBoogaloo.csv') as csv_file:
         # datetimeTo = datetime.fromisoformat(row[4]+extraChar+row[5])
         datetimeTo = datetime.fromisoformat(row[4])
 
-        listOfUse.append([row[0], row[1], datetimeFrom, datetimeTo])
+        listOfUse.append([row[0], float(row[1]), datetimeFrom, datetimeTo])
 
 energyList = []
 timeList = []
 
 for element in listOfUse:
-    energyList.append(float(element[1]))
+    energyList.append(element[1])
     timeList.append(element[2])
 
 # datetimeFromTimestamp = datetime.fromisoformat("2020-09-23 01:00:00+00:00:00")
@@ -42,25 +43,27 @@ for element in listOfUse:
 
 x_indexes = np.arange(len(timeList))
 
-pyplot.plot(timeList, energyList, color='#babae8')
-# pyplot.plot(x_indexes, energyList, color='#0000ff', marker='.')
+plt.plot(timeList, energyList, color='#babae8')
+# plt.plot(x_indexes, energyList, color='#0000ff', marker='.')
 
-# pyplot.xticks(ticks=x_indexes, labels=timeList)
+# plt.xticks(ticks=x_indexes, labels=timeList)
 
-ax = pyplot.axes()
+ax = plt.axes()
 
-xfmt = dates.DateFormatter('%H:%M')
+hours = mdates.HourLocator()
+hours_fmt = mdates.DateFormatter('%H:%M')
 # ax.set_xtics(x_indexes)
-ax.xaxis.set_major_formatter(xfmt)
+ax.xaxis.set_major_formatter(hours_fmt)
+ax.xaxis.set_minor_locator(hours)
 
-pyplot.title('24th Sept 2020')
-pyplot.xlabel('Time of day (h)')
-pyplot.ylabel('Energy Consumption (kWh)')
+plt.title('24th Sept 2020')
+plt.xlabel('Time of day (h)')
+plt.ylabel('Energy Consumption (kWh)')
 
-# pyplot.legend()
+# plt.legend()
 
-# pyplot.grid(True)
+# plt.grid(True)
 
-pyplot.savefig('plot.png')
+plt.savefig('plot.png')
 
-pyplot.show()
+plt.show()
