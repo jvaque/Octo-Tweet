@@ -1,9 +1,13 @@
-# import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime
 import csv
+import json
+
+# Retrieve values from config file
+with open('appsettings.json', 'r') as f:
+    config = json.load(f)
 
 listOfUse = []
 with open('data2electricBoogaloo.csv') as csv_file:
@@ -43,7 +47,12 @@ for element in listOfUse:
 
 x_indexes = np.arange(len(timeList))
 
-plt.plot(timeList, energyList, color='#babae8')
+plt.plot(timeList, energyList, color=config['Charts']['electricity_color_line'])
+plt.fill_between(timeList, energyList, color=config['Charts']['electricity_color_fill'])
+
+# plt.plot(timeList, energyList, color=config['Charts']['gas_color_line'])
+# plt.fill_between(timeList, energyList, color=config['Charts']['gas_color_fill'])
+
 # plt.plot(x_indexes, energyList, color='#0000ff', marker='.')
 
 # plt.xticks(ticks=x_indexes, labels=timeList)
