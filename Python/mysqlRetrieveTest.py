@@ -11,7 +11,7 @@ import matplotlib.dates as mdates
 import json
 
 # Retrieve values from config file
-with open('appsettings.json', 'r') as f:
+with open('Python/appsettings.json', 'r') as f:
     config = json.load(f)
 
 # ------------------------------------------------------------------------------
@@ -99,14 +99,14 @@ for day in range(days):
     # chartTitle = "{:%d %b %Y}".format(queryDayStart)"
     # plotLineColor = config['Charts']['electricity_color_line'])
     # plotFillColor = config['Charts']['electricity_color_fill'])
-    # fileName = "images/electricity-plot-{:%Y-%m-%d}.png".format(queryDayStart)
+    # fileName = "Python/images/electricity-plot-{:%Y-%m-%d}.png".format(queryDayStart)
 
     # Create and save a copy of the daily chart
     dailyChart(dailyListOfUse=listOfUse, 
                chartTitle=("{:%d %b %Y}".format(queryDayStart)), 
                plotLineColor=config['Charts']['electricity_color_line'], 
                plotFillColor=config['Charts']['electricity_color_fill'], 
-               fileName=("images/electricity-plot-{:%Y-%m-%d}.png".format(queryDayStart)))
+               fileName=("Python/images/electricity-plot-{:%Y-%m-%d}.png".format(queryDayStart)))
 
 
     # -----------------------------------------------------------------------------------------------------------------------
@@ -144,14 +144,14 @@ for day in range(days):
     # chartTitle = "{:%d %b %Y}".format(queryDayStart)"
     # plotLineColor = config['Charts']['gas_color_line'])
     # plotFillColor = config['Charts']['gas_color_fill'])
-    # fileName = "images/gas-plot-{:%Y-%m-%d}.png".format(queryDayStart)
+    # fileName = "Python/images/gas-plot-{:%Y-%m-%d}.png".format(queryDayStart)
 
     # Create and save a copy of the daily chart
     dailyChart(dailyListOfUse=listOfUse, 
                chartTitle=("{:%d %b %Y}".format(queryDayStart)), 
                plotLineColor=config['Charts']['gas_color_line'], 
                plotFillColor=config['Charts']['gas_color_fill'], 
-               fileName=("images/gas-plot-{:%Y-%m-%d}.png".format(queryDayStart)))
+               fileName=("Python/images/gas-plot-{:%Y-%m-%d}.png".format(queryDayStart)))
 
     # -----------------------------------------------------------------------------------------------------------------------
     queryDayStart = queryDayStart + datetime.timedelta(1)
