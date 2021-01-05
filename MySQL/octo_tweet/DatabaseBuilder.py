@@ -64,7 +64,7 @@ def terminalOutput():
 def main():
     addDatabaseDirToList()
     addTablesDirToList()
-    # addToDirListFromDir("Views") # No views exist in the current project
+    addToDirListFromDir("Views")
     addToDirListFromSubDirs("Stored_Procedures")
     addToDirListFromDir("Users")
     addToDirListFromDir("Permissions")
