@@ -54,7 +54,7 @@ def createAndSaveSourceCallsToFile():
     for sqlPath in fullPathSqlFiles:
         sourceCalls += f"SOURCE {sqlPath}\n"
 
-    with open('migrations.sql', 'w') as f:
+    with open(f'{dir}\\migrations.sql', 'w') as f:
         f.write(sourceCalls)
 
 def terminalOutput():
