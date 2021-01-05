@@ -1,3 +1,4 @@
+import os
 import datetime
 import mysql.connector
 from mysql.connector import errorcode
@@ -10,16 +11,18 @@ import matplotlib.dates as mdates
 # import csv
 import json
 
+# Get path to the python script being run
+dir = os.path.abspath(os.path.dirname(__file__))
+
 # Retrieve values from config file
-with open('Python/appsettings.json', 'r') as f:
+with open(f'{dir}/appsettings.json', 'r') as f:
     config = json.load(f)
 
 # ------------------------------------------------------------------------------
-# chartTitle = "{:%d %b %Y}".format(queryDayStart)"
+# chartTitle = f"{queryDayStart:%d %b %Y}"
 # plotLineColor = config['Charts']['electricity_color_line'])
 # plotFillColor = config['Charts']['electricity_color_fill'])
-# fileName = "images/electricity-plot-{:%Y-%m-%d}.png".format(queryDayStart)
-
+# fileName = f"{dir}/images/electricity-plot-{queryDayStart:%Y-%m-%d}.png"
 
 def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileName):
     energyList = []
@@ -96,17 +99,17 @@ for day in range(days):
         cnx.close()
 
 
-    # chartTitle = "{:%d %b %Y}".format(queryDayStart)"
+    # chartTitle = f"{queryDayStart:%d %b %Y}"
     # plotLineColor = config['Charts']['electricity_color_line'])
     # plotFillColor = config['Charts']['electricity_color_fill'])
-    # fileName = "Python/images/electricity-plot-{:%Y-%m-%d}.png".format(queryDayStart)
+    # fileName = f"{dir}/images/electricity-plot-{queryDayStart:%Y-%m-%d}.png"
 
     # Create and save a copy of the daily chart
     dailyChart(dailyListOfUse=listOfUse, 
-               chartTitle=("{:%d %b %Y}".format(queryDayStart)), 
+               chartTitle=(f"{queryDayStart:%d %b %Y}"), 
                plotLineColor=config['Charts']['electricity_color_line'], 
                plotFillColor=config['Charts']['electricity_color_fill'], 
-               fileName=("Python/images/electricity-plot-{:%Y-%m-%d}.png".format(queryDayStart)))
+               fileName=(f"{dir}/images/electricity-plot-{queryDayStart:%Y-%m-%d}.png"))
 
 
     # -----------------------------------------------------------------------------------------------------------------------
@@ -141,17 +144,18 @@ for day in range(days):
         cnx.close()
 
 
-    # chartTitle = "{:%d %b %Y}".format(queryDayStart)"
+    # chartTitle = f"{queryDayStart:%d %b %Y}"
     # plotLineColor = config['Charts']['gas_color_line'])
     # plotFillColor = config['Charts']['gas_color_fill'])
-    # fileName = "Python/images/gas-plot-{:%Y-%m-%d}.png".format(queryDayStart)
+    # fileName = f"{dir}/images/gas-plot-{queryDayStart:%Y-%m-%d}.png"
 
     # Create and save a copy of the daily chart
     dailyChart(dailyListOfUse=listOfUse, 
-               chartTitle=("{:%d %b %Y}".format(queryDayStart)), 
+               chartTitle=(f"{queryDayStart:%d %b %Y}"), 
                plotLineColor=config['Charts']['gas_color_line'], 
                plotFillColor=config['Charts']['gas_color_fill'], 
-               fileName=("Python/images/gas-plot-{:%Y-%m-%d}.png".format(queryDayStart)))
+               fileName=(f"{dir}/images/gas-plot-{queryDayStart:%Y-%m-%d}.png"))
+               
 
     # -----------------------------------------------------------------------------------------------------------------------
     queryDayStart = queryDayStart + datetime.timedelta(1)
