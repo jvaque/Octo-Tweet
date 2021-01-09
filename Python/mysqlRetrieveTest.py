@@ -62,6 +62,34 @@ def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileNam
     plt.close()
 # ------------------------------------------------------------------------------
 
+def callStoredProcedure(storedProcedureName, args):
+    try:
+        cnx = mysql.connector.connect(user=config['MySql']['user_name'], 
+                                      password=config['MySql']['password'],
+                                      host=config['MySql']['host'],
+                                      database=config['MySql']['database_name'])
+        
+        cursor = cnx.cursor()
+
+        resultArgs = cursor.callproc(storedProcedureName, args)
+
+        for element in cursor.stored_results():
+            listOfResults = element.fetchall()
+
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with your user name or password")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+        else:
+            print(err)
+
+    finally:
+        cursor.close()
+        cnx.close()
+    
+    return listOfResults
+
 days = 75
 queryDayStart = datetime.date(2020, 9, 23)
 # queryDayStart = datetime.date(2020, 10, 23)
@@ -71,37 +99,8 @@ for day in range(days):
     # Electricity chart for the day
     listOfUse = []
     
-    try:
-        cnx = mysql.connector.connect(user=config['MySql']['user_name'], 
-                                      password=config['MySql']['password'],
-                                      host=config['MySql']['host'],
-                                      database=config['MySql']['database_name'])
-        
-        cursor = cnx.cursor()
-
-        args = [queryDayStart, queryDayEnd]
-        resultArgs = cursor.callproc('spElectricity_GetRecordsFromRange', args)
-
-        for element in cursor.stored_results():
-            listOfUse = element.fetchall()
-
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Something is wrong with your user name or password")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exist")
-        else:
-            print(err)
-
-    finally:
-        cursor.close()
-        cnx.close()
-
-
-    # chartTitle = f"{queryDayStart:%d %b %Y}"
-    # plotLineColor = config['Charts']['electricity_color_line'])
-    # plotFillColor = config['Charts']['electricity_color_fill'])
-    # fileName = f"{dir}/images/electricity-plot-{queryDayStart:%Y-%m-%d}.png"
+    args = [queryDayStart, queryDayEnd]
+    listOfUse = callStoredProcedure('spElectricity_GetRecordsFromRange', args)
 
     # Create and save a copy of the daily chart
     dailyChart(dailyListOfUse=listOfUse, 
@@ -110,42 +109,11 @@ for day in range(days):
                plotFillColor=config['Charts']['electricity_color_fill'], 
                fileName=(f"{dir}/images/electricity-plot-{queryDayStart:%Y-%m-%d}.png"))
 
-
-    # -----------------------------------------------------------------------------------------------------------------------
     # Gas chart for the day
     listOfUse = []
     
-    try:
-        cnx = mysql.connector.connect(user=config['MySql']['user_name'], 
-                                      password=config['MySql']['password'],
-                                      host=config['MySql']['host'],
-                                      database=config['MySql']['database_name'])
-        
-        cursor = cnx.cursor()
-
-        args = [queryDayStart, queryDayEnd]
-        resultArgs = cursor.callproc('spGas_GetRecordsFromRange', args)
-
-        for element in cursor.stored_results():
-            listOfUse = element.fetchall()
-
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Something is wrong with your user name or password")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exist")
-        else:
-            print(err)
-    
-    finally:
-        cursor.close()
-        cnx.close()
-
-
-    # chartTitle = f"{queryDayStart:%d %b %Y}"
-    # plotLineColor = config['Charts']['gas_color_line'])
-    # plotFillColor = config['Charts']['gas_color_fill'])
-    # fileName = f"{dir}/images/gas-plot-{queryDayStart:%Y-%m-%d}.png"
+    args = [queryDayStart, queryDayEnd]
+    listOfUse = callStoredProcedure('spGas_GetRecordsFromRange', args)
 
     # Create and save a copy of the daily chart
     dailyChart(dailyListOfUse=listOfUse, 
@@ -153,9 +121,8 @@ for day in range(days):
                plotLineColor=config['Charts']['gas_color_line'], 
                plotFillColor=config['Charts']['gas_color_fill'], 
                fileName=(f"{dir}/images/gas-plot-{queryDayStart:%Y-%m-%d}.png"))
-               
+    
 
-    # -----------------------------------------------------------------------------------------------------------------------
     queryDayStart = queryDayStart + datetime.timedelta(1)
     queryDayEnd = queryDayStart + datetime.timedelta(1)
 
@@ -168,7 +135,7 @@ for day in range(days):
 # select the latest date done from the yet to be done table
 # 
 # retrieve the next day's worth of data
-#  select * from electricity where electricity_interval_start_datetime >= '2020-10-23' and electricity_interval_end_datetime <= '2020-10-24' order by electricity_interval_start_datetime;
+#
 # make chart
 # 
 # tweet
