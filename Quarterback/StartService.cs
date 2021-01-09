@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Octo_Tweet.Data.Libary.DataAccess;
 using Octo_Tweet.Data.Libary.Models;
 using Octo_Tweet.Library.Api;
@@ -35,6 +35,11 @@ namespace Quarterback
 
         public async Task Run()
         {
+            // Test to retrieve latest records from database
+            ElectricityModel lastRecordElectricity = await _electricity.RetrieveLastRecordElectricityAsync();
+            GasModel lasRecordGas = await _gas.RetrieveLastRecordGasAsync();
+
+            // Electricity
             string electricityMPAN = _config.GetValue<string>("OctopusApi:Electricity:mpan");
             string electricitySerialNumber = _config.GetValue<string>("OctopusApi:Electricity:serial_number");
 
@@ -56,7 +61,7 @@ namespace Quarterback
 
             await Task.WhenAll(tasks);
 
-
+            // Gas
             string gasMPAN = _config.GetValue<string>("OctopusApi:Gas:mpan");
             string gasSerialNumber = _config.GetValue<string>("OctopusApi:Gas:serial_number");
 

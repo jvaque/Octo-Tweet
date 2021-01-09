@@ -7,5 +7,6 @@ namespace Octo_Tweet.Data.Libary.DataAccess
     public interface IGas
     {
         Task SaveListGasAsync(List<GasModel> gasList);
+        Task<GasModel> RetrieveLastRecordGasAsync();
     }
 }

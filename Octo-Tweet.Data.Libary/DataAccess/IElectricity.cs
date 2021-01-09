@@ -7,5 +7,6 @@ namespace Octo_Tweet.Data.Libary.DataAccess
     public interface IElectricity
     {
         Task SaveListElectricityAsync(List<ElectricityModel> electricityList);
+        Task<ElectricityModel> RetrieveLastRecordElectricityAsync();
     }
 }
