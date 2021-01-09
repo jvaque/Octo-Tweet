@@ -22,7 +22,7 @@ with open(f'{dir}/appsettings.json', 'r') as f:
 # chartTitle = f"{queryDayStart:%d %b %Y}"
 # plotLineColor = config['Charts']['electricity_color_line'])
 # plotFillColor = config['Charts']['electricity_color_fill'])
-# fileName = f"{dir}/images/electricity-plot-{queryDayStart:%Y-%m-%d}.png"
+# fileName = f"{dir}/images/day/electricity-plot-{queryDayStart:%Y-%m-%d}.png"
 
 def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileName):
     energyList = []
@@ -48,6 +48,52 @@ def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileNam
     # ax.set_xtics(x_indexes)
     ax.xaxis.set_major_formatter(hours_fmt)
     ax.xaxis.set_minor_locator(hours)
+
+    plt.title(chartTitle)
+    plt.xlabel('Time of day (h)')
+    plt.ylabel('Energy Consumption (kWh)')
+
+    # plt.legend()
+
+    # plt.grid(True)
+
+    plt.savefig(fileName)
+    # plt.show() # commented out when not being tested
+    plt.close()
+# ------------------------------------------------------------------------------
+# chartTitle = f"{queryWeekStart:%d %b %Y}"
+# plotLineColor = config['Charts']['electricity_color_line'])
+# plotFillColor = config['Charts']['electricity_color_fill'])
+# fileName = f"{dir}/images/week/electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png"
+
+def weeklyChart(weeklyListOfUse, chartTitle, plotLineColor, plotFillColor, fileName):
+    energyList = []
+    timeList = []
+
+    for timePeriod in weeklyListOfUse:
+        energyList.append(timePeriod[1])
+        timeList.append(timePeriod[2])
+
+    x_indexes = np.arange(len(timeList))
+
+    plt.plot(timeList, energyList, color=plotLineColor)
+    plt.fill_between(timeList, energyList, color=plotFillColor)
+
+    # plt.plot(x_indexes, energyList, color='#0000ff', marker='.')
+
+    # plt.xticks(ticks=x_indexes, labels=timeList)
+
+    ax = plt.axes()
+
+    hours = mdates.HourLocator(interval=6)
+    hour_fmt = mdates.DateFormatter('%H')
+    days = mdates.DayLocator()
+    day_fmt = mdates.DateFormatter('%a %d')
+    # ax.set_xtics(x_indexes)
+    ax.xaxis.set_major_locator(days)
+    ax.xaxis.set_minor_locator(hours)
+    ax.xaxis.set_major_formatter(day_fmt)
+    ax.xaxis.set_minor_formatter(hour_fmt)
 
     plt.title(chartTitle)
     plt.xlabel('Time of day (h)')
@@ -107,7 +153,7 @@ for day in range(days):
                chartTitle=(f"{queryDayStart:%d %b %Y}"), 
                plotLineColor=config['Charts']['electricity_color_line'], 
                plotFillColor=config['Charts']['electricity_color_fill'], 
-               fileName=(f"{dir}/images/electricity-plot-{queryDayStart:%Y-%m-%d}.png"))
+               fileName=(f"{dir}/images/day/electricity-plot-{queryDayStart:%Y-%m-%d}.png"))
 
     # Gas chart for the day
     listOfUse = []
@@ -120,15 +166,46 @@ for day in range(days):
                chartTitle=(f"{queryDayStart:%d %b %Y}"), 
                plotLineColor=config['Charts']['gas_color_line'], 
                plotFillColor=config['Charts']['gas_color_fill'], 
-               fileName=(f"{dir}/images/gas-plot-{queryDayStart:%Y-%m-%d}.png"))
-    
+               fileName=(f"{dir}/images/day/gas-plot-{queryDayStart:%Y-%m-%d}.png"))
 
     queryDayStart = queryDayStart + datetime.timedelta(1)
     queryDayEnd = queryDayStart + datetime.timedelta(1)
 
 
+weeks = 13
+queryWeekStart = datetime.date(2020, 9, 21)
+# queryWeekStart = datetime.date(2020, 10, 23)
+queryWeekEnd = queryWeekStart + datetime.timedelta(6)
 
+for week in range(weeks):
+    # Electricity chart for the week
+    listOfUse = []
+    
+    args = [queryWeekStart, queryWeekEnd]
+    listOfUse = callStoredProcedure('spElectricity_GetRecordsFromRange', args)
 
+    # Create and save a copy of the daily chart
+    weeklyChart(weeklyListOfUse=listOfUse, 
+               chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
+               plotLineColor=config['Charts']['electricity_color_line'], 
+               plotFillColor=config['Charts']['electricity_color_fill'], 
+               fileName=(f"{dir}/images/week/electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png"))
+
+    # Gas chart for the week
+    listOfUse = []
+    
+    args = [queryWeekStart, queryWeekEnd]
+    listOfUse = callStoredProcedure('spGas_GetRecordsFromRange', args)
+
+    # Create and save a copy of the daily chart
+    weeklyChart(weeklyListOfUse=listOfUse, 
+               chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
+               plotLineColor=config['Charts']['gas_color_line'], 
+               plotFillColor=config['Charts']['gas_color_fill'], 
+               fileName=(f"{dir}/images/week/gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png"))
+
+    queryWeekStart = queryWeekStart + datetime.timedelta(7)
+    queryWeekEnd = queryWeekStart + datetime.timedelta(6)
 
 # Go through the data and produce a daily chart
 #
