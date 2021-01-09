@@ -79,14 +79,11 @@ for day in range(days):
         
         cursor = cnx.cursor()
 
-        query = "select * from electricity where electricity_interval_start_datetime >= %s and electricity_interval_end_datetime <= %s order by electricity_interval_start_datetime;"
-        
-        cursor.execute(query, (queryDayStart, queryDayEnd))
+        args = [queryDayStart, queryDayEnd]
+        resultArgs = cursor.callproc('spElectricity_GetRecordsFromRange', args)
 
-        for element in cursor:
-            listOfUse.append(element)
-
-        cursor.close()
+        for element in cursor.stored_results():
+            listOfUse = element.fetchall()
 
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -95,7 +92,9 @@ for day in range(days):
             print("Database does not exist")
         else:
             print(err)
-    else:
+
+    finally:
+        cursor.close()
         cnx.close()
 
 
@@ -124,14 +123,11 @@ for day in range(days):
         
         cursor = cnx.cursor()
 
-        query = "select * from gas where gas_interval_start_datetime >= %s and gas_interval_end_datetime <= %s order by gas_interval_start_datetime;"
-        
-        cursor.execute(query, (queryDayStart, queryDayEnd))
+        args = [queryDayStart, queryDayEnd]
+        resultArgs = cursor.callproc('spGas_GetRecordsFromRange', args)
 
-        for element in cursor:
-            listOfUse.append(element)
-
-        cursor.close()
+        for element in cursor.stored_results():
+            listOfUse = element.fetchall()
 
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -140,7 +136,9 @@ for day in range(days):
             print("Database does not exist")
         else:
             print(err)
-    else:
+    
+    finally:
+        cursor.close()
         cnx.close()
 
 
