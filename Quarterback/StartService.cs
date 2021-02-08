@@ -35,27 +35,47 @@ namespace Quarterback
 
         public async Task Run()
         {
+            //// Retrieve and save all the history from Electricity & Gas
+            //// Electricity
+            //List<List<ElectricityModel>> allHistoryElectricityUse = await AllHistoryElectricity();
+
+            //List<Task> tasks = new List<Task>();
+            //foreach (var item in allHistoryElectricityUse)
+            //{
+            //    tasks.Add(_electricity.SaveListElectricityAsync(item));
+            //}
+
+            //await Task.WhenAll(tasks);
+
+            //// Gas
+            //List<List<GasModel>> allHistoryGasUse = await AllHistoryGas();
+
+            //tasks = new List<Task>();
+            //foreach (var item in allHistoryGasUse)
+            //{
+            //    tasks.Add(_gas.SaveListGasAsync(item));
+            //}
+
+            //await Task.WhenAll(tasks);
+
+            // ----------------------------------------------------------------
+
+            // Retrieve and save all the new infromation from Electricity & Gas
             // Electricity
-            List<List<ElectricityModel>> allHistoryElectricityUse = await AllHistoryElectricity();
+            List<ElectricityModel> tempNameElectricityNew = await NewHistoryElectricity();
 
-            List<Task> tasks = new List<Task>();
-            foreach (var item in allHistoryElectricityUse)
+            if (tempNameElectricityNew.Count > 0)
             {
-                tasks.Add(_electricity.SaveListElectricityAsync(item));
+                await _electricity.SaveListElectricityAsync(tempNameElectricityNew);
             }
-
-            await Task.WhenAll(tasks);
 
             // Gas
-            List<List<GasModel>> allHistoryGasUse = await AllHistoryGas();
+            List<GasModel> tempNameGasNew = await NewHistoryGas();
 
-            tasks = new List<Task>();
-            foreach (var item in allHistoryGasUse)
+            if (tempNameGasNew.Count > 0)
             {
-                tasks.Add(_gas.SaveListGasAsync(item));
+                await _gas.SaveListGasAsync(tempNameGasNew);
             }
-
-            await Task.WhenAll(tasks);
         }
 
         private List<ElectricityModel> MapApiElectricityToDatabase(ApiElectricityModel apiElectricityModel)
@@ -72,7 +92,7 @@ namespace Quarterback
                     Electricity_interval_end_offset = item.Interval_end.Offset
                 });
             }
-            
+
             return output;
         }
         
@@ -90,8 +110,130 @@ namespace Quarterback
                     Gas_interval_end_offset = item.Interval_end.Offset
                 });
             }
-            
+
             return output;
+        }
+
+        private async Task<List<ElectricityModel>> NewHistoryElectricity()
+        {
+            // Retrieve config values
+            string electricityMPAN = _config.GetValue<string>("OctopusApi:Electricity:mpan");
+            string electricitySerialNumber = _config.GetValue<string>("OctopusApi:Electricity:serial_number");
+
+            // Retrieve latest record from database
+            ElectricityModel lastRecordElectricity = await _electricity.RetrieveLastRecordElectricityAsync();
+
+            // Variables
+            List<ElectricityModel> returnList = new List<ElectricityModel>();
+            int page = 1;
+            int useCount = 0;
+
+            while (true)
+            {
+                // Get a page of values
+                ApiElectricityModel temp = await _octopusElectricityHelper.GetConsumptionPage(page, electricityMPAN, electricitySerialNumber);
+
+                if (useCount == 0)
+                {
+                    useCount = temp.Count;
+                }
+                else if (useCount != temp.Count)
+                {
+                    // Throw an error if the ammount of records get changed as the program is making subsequent calls
+                    // Look if there is a more gracefull way of handling this error in the future
+                    throw new Exception();
+                }
+
+                // Parse from ApiElectricityModel to List<ElectricityModel>
+                List<ElectricityModel> tempList = MapApiElectricityToDatabase(temp);
+
+                // Look at each record and determine if the last record in the database has been reached
+                foreach (var item in tempList)
+                {
+                    // TODO: look at a way to incorporate a way to determine if two instances of a class hold the same values determining them as "equal" 
+                    //  even if they are different instances of a class.
+                    bool tempBoolTest = item.Electricity_consumption == lastRecordElectricity.Electricity_consumption &
+                                        item.Electricity_interval_start_datetime == lastRecordElectricity.Electricity_interval_start_datetime &
+                                        item.Electricity_interval_start_offset == lastRecordElectricity.Electricity_interval_start_offset &
+                                        item.Electricity_interval_end_datetime == lastRecordElectricity.Electricity_interval_end_datetime &
+                                        item.Electricity_interval_end_offset == lastRecordElectricity.Electricity_interval_end_offset;
+
+                    // Record match found
+                    if (tempBoolTest)
+                    {
+                        return returnList;
+                    }
+                    // Record not found
+                    else
+                    {
+                        returnList.Add(item);
+                    }
+                }
+
+                page++;
+
+            }
+        }
+
+        private async Task<List<GasModel>> NewHistoryGas()
+        {
+            // Retrieve config values
+            string gasMPAN = _config.GetValue<string>("OctopusApi:Gas:mpan");
+            string gasSerialNumber = _config.GetValue<string>("OctopusApi:Gas:serial_number");
+
+            // Retrieve latest record from database
+            GasModel lastRecordGas = await _gas.RetrieveLastRecordGasAsync();
+
+            // Variables
+            List<GasModel> returnList = new List<GasModel>();
+            int page = 1;
+            int useCount = 0;
+
+            while (true)
+            {
+                // Get a page of values
+                ApiGasModel temp = await _octopusGasHelper.GetConsumptionPage(page, gasMPAN, gasSerialNumber);
+
+                if (useCount == 0)
+                {
+                    useCount = temp.Count;
+                }
+                else if (useCount != temp.Count)
+                {
+                    // Throw an error if the ammount of records get changed as the program is making subsequent calls
+                    // Look if there is a more gracefull way of handling this error in the future
+                    throw new Exception();
+                }
+
+                // Parse from ApiGasModel to List<GasModel>
+                List<GasModel> tempList = MapApiGasToDatabase(temp);
+
+                // Look at each record and determine if the last record in the database has been reached
+                foreach (var item in tempList)
+                {
+                    // TODO: look at a way to incorporate a way to determine if two instances of a class hold the same values determining them as "equal" 
+                    //  even if they are different instances of a class.
+                    bool tempBoolTest = item.Gas_consumption == lastRecordGas.Gas_consumption &
+                                        item.Gas_interval_start_datetime == lastRecordGas.Gas_interval_start_datetime &
+                                        item.Gas_interval_start_offset == lastRecordGas.Gas_interval_start_offset &
+                                        item.Gas_interval_end_datetime == lastRecordGas.Gas_interval_end_datetime &
+                                        item.Gas_interval_end_offset == lastRecordGas.Gas_interval_end_offset;
+
+                    // Record match found
+                    if (tempBoolTest)
+                    {
+                        return returnList;
+                    }
+                    // Record not found
+                    else
+                    {
+                        returnList.Add(item);
+                    }
+                }
+
+                page++;
+
+            }
         }
 
         private async Task<List<List<ElectricityModel>>> AllHistoryElectricity()
