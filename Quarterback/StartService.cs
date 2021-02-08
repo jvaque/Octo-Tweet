@@ -35,26 +35,11 @@ namespace Quarterback
 
         public async Task Run()
         {
-            // Test to retrieve latest records from database
-            ElectricityModel lastRecordElectricity = await _electricity.RetrieveLastRecordElectricityAsync();
-            GasModel lasRecordGas = await _gas.RetrieveLastRecordGasAsync();
-
             // Electricity
-            string electricityMPAN = _config.GetValue<string>("OctopusApi:Electricity:mpan");
-            string electricitySerialNumber = _config.GetValue<string>("OctopusApi:Electricity:serial_number");
-
-            ApiElectricityModel electricityUse = await _octopusElectricityHelper.GetConsumption(electricityMPAN, electricitySerialNumber);
-
-            List<ApiElectricityModel> allHistoryElectricityUse = await AllHistoryElectricity(electricityUse.Count);
-
-            List<List<ElectricityModel>> veryBadNameElectricity = new List<List<ElectricityModel>>();
-            foreach (var item in allHistoryElectricityUse)
-            {
-                veryBadNameElectricity.Add(MapApiElectricityToDatabase(item));
-            }
+            List<List<ElectricityModel>> allHistoryElectricityUse = await AllHistoryElectricity();
 
             List<Task> tasks = new List<Task>();
-            foreach (var item in veryBadNameElectricity)
+            foreach (var item in allHistoryElectricityUse)
             {
                 tasks.Add(_electricity.SaveListElectricityAsync(item));
             }
@@ -62,27 +47,15 @@ namespace Quarterback
             await Task.WhenAll(tasks);
 
             // Gas
-            string gasMPAN = _config.GetValue<string>("OctopusApi:Gas:mpan");
-            string gasSerialNumber = _config.GetValue<string>("OctopusApi:Gas:serial_number");
-
-            ApiGasModel gasUse = await _octopusGasHelper.GetConsumption(gasMPAN, gasSerialNumber);
-
-            List<ApiGasModel> allHistoryGasUse = await AllHistoryGas(gasUse.Count);
-
-            List<List<GasModel>> veryBadNameGas = new List<List<GasModel>>();
-            foreach (var item in allHistoryGasUse)
-            {
-                veryBadNameGas.Add(MapApiGasToDatabase(item));
-            }
+            List<List<GasModel>> allHistoryGasUse = await AllHistoryGas();
 
             tasks = new List<Task>();
-            foreach (var item in veryBadNameGas)
+            foreach (var item in allHistoryGasUse)
             {
                 tasks.Add(_gas.SaveListGasAsync(item));
             }
 
             await Task.WhenAll(tasks);
-
         }
 
         private List<ElectricityModel> MapApiElectricityToDatabase(ApiElectricityModel apiElectricityModel)
@@ -121,14 +94,18 @@ namespace Quarterback
             return output;
         }
 
-        private async Task<List<ApiElectricityModel>> AllHistoryElectricity(double useCount)
+        private async Task<List<List<ElectricityModel>>> AllHistoryElectricity()
         {
+            // Retrieve config values
             string electricityMPAN = _config.GetValue<string>("OctopusApi:Electricity:mpan");
             string electricitySerialNumber = _config.GetValue<string>("OctopusApi:Electricity:serial_number");
 
-            double electricityPages = Math.Ceiling(useCount / 100d);
+            // Call api to retrieve count or records to retrieve
+            ApiElectricityModel tempUse = await _octopusElectricityHelper.GetConsumption(electricityMPAN, electricitySerialNumber);
 
-            List<ApiElectricityModel> electricityHistory = new List<ApiElectricityModel>();
+            double electricityPages = Math.Ceiling(tempUse.Count / 100d);
+
+            List<List<ElectricityModel>> electricityHistory = new List<List<ElectricityModel>>();
             List<Task<ApiElectricityModel>> tasks = new List<Task<ApiElectricityModel>>();
 
             for (int page = 1; page < (electricityPages + 1); page++)
@@ -137,22 +114,38 @@ namespace Quarterback
             }
 
             var results = await Task.WhenAll(tasks);
+            int countOfRetrievedRecords = 0;
             foreach (var item in results)
             {
-                electricityHistory.Add(item);
+                List<ElectricityModel> tempList = MapApiElectricityToDatabase(item);
+                countOfRetrievedRecords += tempList.Count;
+                electricityHistory.Add(tempList);
             }
 
-            return electricityHistory;
+            if (tempUse.Count == countOfRetrievedRecords)
+            {
+                return electricityHistory;
+            }
+            else
+            {
+                // TODO: Find a more elegant way to handle the error
+                throw new Exception();
+            }
+
         }
 
-        private async Task<List<ApiGasModel>> AllHistoryGas(double useCount)
+        private async Task<List<List<GasModel>>> AllHistoryGas()
         {
+            // Retrieve config values
             string gasMPAN = _config.GetValue<string>("OctopusApi:Gas:mpan");
             string gasSerialNumber = _config.GetValue<string>("OctopusApi:Gas:serial_number");
 
-            double gasPages = Math.Ceiling(useCount / 100d);
+            // Call api to retrieve count or records to retrieve
+            ApiGasModel tempUse = await _octopusGasHelper.GetConsumption(gasMPAN, gasSerialNumber);
 
-            List<ApiGasModel> gasHistory = new List<ApiGasModel>();
+            double gasPages = Math.Ceiling(tempUse.Count / 100d);
+
+            List<List<GasModel>> gasHistory = new List<List<GasModel>>();
             List<Task<ApiGasModel>> task = new List<Task<ApiGasModel>>();
 
             for (int page = 1; page < (gasPages + 1); page++)
@@ -161,12 +154,23 @@ namespace Quarterback
             }
 
             var results = await Task.WhenAll(task);
+            int countOfRetrievedRecords = 0;
             foreach (var item in results)
             {
-                gasHistory.Add(item);
+                List<GasModel> tempList = MapApiGasToDatabase(item);
+                countOfRetrievedRecords += tempList.Count;
+                gasHistory.Add(tempList);
             }
 
-            return gasHistory;
+            if (tempUse.Count == countOfRetrievedRecords)
+            {
+                return gasHistory;
+            }
+            else
+            {
+                // TODO: Find a more elegant way to handle the error
+                throw new Exception();
+            }
         }
     }
 }
