@@ -32,7 +32,7 @@ namespace Quarterback
                 .Build();
 
             var svc = ActivatorUtilities.CreateInstance<StartService>(host.Services);
-            await svc.Run();
+            await svc.Run(args);
         }
     }
 }

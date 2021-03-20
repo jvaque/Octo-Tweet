@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Quarterback": {
+      "commandName": "Project",
+      "commandLineArgs": "-a"
+    }
+  }
+}

@@ -4,6 +4,6 @@ namespace Quarterback
 {
     public interface IStartService
     {
-        Task Run();
+        Task Run(string[] args);
     }
 }

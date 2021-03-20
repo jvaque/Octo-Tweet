@@ -33,48 +33,55 @@ namespace Quarterback
             _gas = gas;
         }
 
-        public async Task Run()
+        public async Task Run(string[] args)
         {
-            //// Retrieve and save all the history from Electricity & Gas
-            //// Electricity
-            //List<List<ElectricityModel>> allHistoryElectricityUse = await AllHistoryElectricity();
-
-            //List<Task> tasks = new List<Task>();
-            //foreach (var item in allHistoryElectricityUse)
-            //{
-            //    tasks.Add(_electricity.SaveListElectricityAsync(item));
-            //}
-
-            //await Task.WhenAll(tasks);
-
-            //// Gas
-            //List<List<GasModel>> allHistoryGasUse = await AllHistoryGas();
-
-            //tasks = new List<Task>();
-            //foreach (var item in allHistoryGasUse)
-            //{
-            //    tasks.Add(_gas.SaveListGasAsync(item));
-            //}
-
-            //await Task.WhenAll(tasks);
-
-            // ----------------------------------------------------------------
-
-            // Retrieve and save all the new infromation from Electricity & Gas
-            // Electricity
-            List<ElectricityModel> tempNameElectricityNew = await NewHistoryElectricity();
-
-            if (tempNameElectricityNew.Count > 0)
+            //Modify program to take args from program start so with a simple flag you can make a call to get all the 
+            // history or to manually get values from a specific date (just go wild)
+            // remember to make changes to the debug propperties to propperly test this changes.
+            //Look into how to properly code for modifiers in a console application.
+            if (args[0] == "-a")
             {
-                await _electricity.SaveListElectricityAsync(tempNameElectricityNew);
+                // Retrieve and save all the history from Electricity & Gas
+                // Electricity
+                List<List<ElectricityModel>> allHistoryElectricityUse = await AllHistoryElectricity();
+
+                List<Task> tasks = new List<Task>();
+                foreach (var item in allHistoryElectricityUse)
+                {
+                    tasks.Add(_electricity.SaveListElectricityAsync(item));
+                }
+
+                await Task.WhenAll(tasks);
+
+                // Gas
+                List<List<GasModel>> allHistoryGasUse = await AllHistoryGas();
+
+                tasks = new List<Task>();
+                foreach (var item in allHistoryGasUse)
+                {
+                    tasks.Add(_gas.SaveListGasAsync(item));
+                }
+
+                await Task.WhenAll(tasks);
             }
-
-            // Gas
-            List<GasModel> tempNameGasNew = await NewHistoryGas();
-
-            if (tempNameGasNew.Count > 0)
+            else
             {
-                await _gas.SaveListGasAsync(tempNameGasNew);
+                // Retrieve and save all the new infromation from Electricity & Gas
+                // Electricity
+                List<ElectricityModel> tempNameElectricityNew = await NewHistoryElectricity();
+
+                if (tempNameElectricityNew.Count > 0)
+                {
+                    await _electricity.SaveListElectricityAsync(tempNameElectricityNew);
+                }
+
+                // Gas
+                List<GasModel> tempNameGasNew = await NewHistoryGas();
+
+                if (tempNameGasNew.Count > 0)
+                {
+                    await _gas.SaveListGasAsync(tempNameGasNew);
+                }
             }
         }
 
