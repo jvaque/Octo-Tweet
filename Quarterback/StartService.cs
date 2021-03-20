@@ -39,30 +39,37 @@ namespace Quarterback
             // history or to manually get values from a specific date (just go wild)
             // remember to make changes to the debug propperties to propperly test this changes.
             //Look into how to properly code for modifiers in a console application.
-            if (args[0] == "-a" || args[0] == "--all")
+            if (args != null && args.Length > 0)
             {
-                // Retrieve and save all the history from Electricity & Gas
-                // Electricity
-                List<List<ElectricityModel>> allHistoryElectricityUse = await AllHistoryElectricity();
-
-                List<Task> tasks = new List<Task>();
-                foreach (var item in allHistoryElectricityUse)
+                if (args[0] == "-a" || args[0] == "--all")
                 {
-                    tasks.Add(_electricity.SaveListElectricityAsync(item));
+                    // Retrieve and save all the history from Electricity & Gas
+                    // Electricity
+                    List<List<ElectricityModel>> allHistoryElectricityUse = await AllHistoryElectricity();
+
+                    List<Task> tasks = new List<Task>();
+                    foreach (var item in allHistoryElectricityUse)
+                    {
+                        tasks.Add(_electricity.SaveListElectricityAsync(item));
+                    }
+
+                    await Task.WhenAll(tasks);
+
+                    // Gas
+                    List<List<GasModel>> allHistoryGasUse = await AllHistoryGas();
+
+                    tasks = new List<Task>();
+                    foreach (var item in allHistoryGasUse)
+                    {
+                        tasks.Add(_gas.SaveListGasAsync(item));
+                    }
+
+                    await Task.WhenAll(tasks);
                 }
-
-                await Task.WhenAll(tasks);
-
-                // Gas
-                List<List<GasModel>> allHistoryGasUse = await AllHistoryGas();
-
-                tasks = new List<Task>();
-                foreach (var item in allHistoryGasUse)
+                else
                 {
-                    tasks.Add(_gas.SaveListGasAsync(item));
+                    Console.WriteLine($"Unrecognized command \"{args[0]}\"");
                 }
-
-                await Task.WhenAll(tasks);
             }
             else
             {
@@ -73,6 +80,11 @@ namespace Quarterback
                 if (tempNameElectricityNew.Count > 0)
                 {
                     await _electricity.SaveListElectricityAsync(tempNameElectricityNew);
+                    Console.WriteLine($"{tempNameElectricityNew.Count} New electricity records found and saved since last update");
+                }
+                else
+                {
+                    Console.WriteLine("No new electricity records found since last update");
                 }
 
                 // Gas
@@ -81,6 +93,11 @@ namespace Quarterback
                 if (tempNameGasNew.Count > 0)
                 {
                     await _gas.SaveListGasAsync(tempNameGasNew);
+                    Console.WriteLine($"{tempNameGasNew.Count} New gas records found and saved since last update");
+                }
+                else
+                {
+                    Console.WriteLine("No new gas records found since last update");
                 }
             }
         }
