@@ -2,7 +2,7 @@
   "profiles": {
     "Quarterback": {
       "commandName": "Project",
-      "commandLineArgs": "-a"
+      "commandLineArgs": "--all"
     }
   }
 }

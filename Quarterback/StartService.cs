@@ -39,7 +39,7 @@ namespace Quarterback
             // history or to manually get values from a specific date (just go wild)
             // remember to make changes to the debug propperties to propperly test this changes.
             //Look into how to properly code for modifiers in a console application.
-            if (args[0] == "-a")
+            if (args[0] == "-a" || args[0] == "--all")
             {
                 // Retrieve and save all the history from Electricity & Gas
                 // Electricity
