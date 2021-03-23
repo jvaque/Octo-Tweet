@@ -33,33 +33,33 @@ def addTablesDirToList():
 
 def addToDirListFromName(fileName, dirName=""):
     if (dirName == ""):
-        fullPathSqlFiles.append(f"{dboDir}\\{fileName}.sql")
+        fullPathSqlFiles.append(f"{dboDir}/{fileName}.sql")
     else:
-        fullPathSqlFiles.append(f"{dboDir}\\{dirName}\\{fileName}.sql")
+        fullPathSqlFiles.append(f"{dboDir}/{dirName}/{fileName}.sql")
 
 def addToDirListFromDir(dirName):
-    files = os.listdir(f"{dboDir}\\{dirName}")
+    files = os.listdir(f"{dboDir}/{dirName}")
 
     for file in files:
-        fullPathSqlFiles.append(f"{dboDir}\\{dirName}\\{file}")
+        fullPathSqlFiles.append(f"{dboDir}/{dirName}/{file}")
 
 def addToDirListFromSubDirs(dirName):
-    subDirs = os.listdir(f"{dboDir}\\{dirName}\\")
+    subDirs = os.listdir(f"{dboDir}/{dirName}/")
 
     for subDir in subDirs:
-        addToDirListFromDir(f"{dirName}\\{subDir}")
+        addToDirListFromDir(f"{dirName}/{subDir}")
 
 def createAndSaveSourceCallsToFile():
     sourceCalls = ""
     for sqlPath in fullPathSqlFiles:
         sourceCalls += f"SOURCE {sqlPath}\n"
 
-    with open(f'{dir}\\migrations.sql', 'w') as f:
+    with open(f'{dir}/migrations.sql', 'w') as f:
         f.write(sourceCalls)
 
 def terminalOutput():
     print("Run the following sql command:")
-    print(f"SOURCE {dir}\\migrations.sql")
+    print(f"SOURCE {dir}/migrations.sql")
 
 def main():
     addDatabaseDirToList()
@@ -74,7 +74,7 @@ def main():
     terminalOutput()
 
 dir = os.path.abspath(os.path.dirname(__file__))
-dboDir = f"{dir}\\dbo"
+dboDir = f"{dir}/dbo"
 fullPathSqlFiles = []
 
 if __name__ == "__main__":
