@@ -139,6 +139,13 @@ class MySqlDataAccess:
         
         return listOfResults
 
+
+def makeImagesFoldersIfMissing(baseDir):
+    listOfDirs = ['day', 'week', 'month', 'quarter', 'year']
+    for folder in listOfDirs:
+        path = os.path.join(baseDir, 'Images', folder)
+        if(not os.path.exists(path)):
+            os.makedirs(path)
 # ------------------------------------------------------------------------------
 
 def main():
@@ -146,10 +153,12 @@ def main():
     dir = os.path.abspath(os.path.dirname(__file__))
 
     # Retrieve values from config file
-    with open(f'{dir}/appsettings.json', 'r') as f:
+    with open(os.path.join(dir, 'appsettings.json'), 'r') as f:
         config = json.load(f)
     # This used to be a global variable and now the function doesn't have access
     #  to it, maybe making it into a class might solve it
+
+    makeImagesFoldersIfMissing(dir)
 
     dataAccess = MySqlDataAccess(config)
 
