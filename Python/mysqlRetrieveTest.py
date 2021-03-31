@@ -11,13 +11,6 @@ import matplotlib.dates as mdates
 # import csv
 import json
 
-# Get path to the python script being run
-dir = os.path.abspath(os.path.dirname(__file__))
-
-# Retrieve values from config file
-with open(f'{dir}/appsettings.json', 'r') as f:
-    config = json.load(f)
-
 # ------------------------------------------------------------------------------
 # chartTitle = f"{queryDayStart:%d %b %Y}"
 # plotLineColor = config['Charts']['electricity_color_line'])
@@ -48,6 +41,9 @@ def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileNam
     # ax.set_xtics(x_indexes)
     ax.xaxis.set_major_formatter(hours_fmt)
     ax.xaxis.set_minor_locator(hours)
+
+    # Commented out the addition of margins as found them ugly
+    # ax.margins(x=0, y=0)
 
     plt.title(chartTitle)
     plt.xlabel('Time of day (h)')
@@ -95,6 +91,9 @@ def weeklyChart(weeklyListOfUse, chartTitle, plotLineColor, plotFillColor, fileN
     ax.xaxis.set_major_formatter(day_fmt)
     ax.xaxis.set_minor_formatter(hour_fmt)
 
+    # Commented out the addition of margins as found them ugly
+    # ax.margins(x=0, y=0)
+
     plt.title(chartTitle)
     plt.xlabel('Time of day (h)')
     plt.ylabel('Energy Consumption (kWh)')
@@ -107,105 +106,130 @@ def weeklyChart(weeklyListOfUse, chartTitle, plotLineColor, plotFillColor, fileN
     # plt.show() # commented out when not being tested
     plt.close()
 # ------------------------------------------------------------------------------
+class MySqlDataAccess:
+    def __init__(self, config):
+        self._config = config
 
-def callStoredProcedure(storedProcedureName, args):
-    try:
-        cnx = mysql.connector.connect(user=config['MySql']['user_name'], 
-                                      password=config['MySql']['password'],
-                                      host=config['MySql']['host'],
-                                      database=config['MySql']['database_name'])
+    def callStoredProcedure(self, storedProcedureName, args, connectionStringName):
+        try:
+            cnx = mysql.connector.connect(
+                user=self._config[connectionStringName]['user_name'],
+                password=self._config[connectionStringName]['password'],
+                host=self._config[connectionStringName]['host'],
+                database=self._config[connectionStringName]['database_name'])
+            
+            cursor = cnx.cursor()
+
+            resultArgs = cursor.callproc(storedProcedureName, args)
+
+            for element in cursor.stored_results():
+                listOfResults = element.fetchall()
+
+        except mysql.connector.Error as err:
+            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                print("Something is wrong with your user name or password")
+            elif err.errno == errorcode.ER_BAD_DB_ERROR:
+                print("Database does not exist")
+            else:
+                print(err)
+
+        finally:
+            cursor.close()
+            cnx.close()
         
-        cursor = cnx.cursor()
+        return listOfResults
 
-        resultArgs = cursor.callproc(storedProcedureName, args)
+# ------------------------------------------------------------------------------
 
-        for element in cursor.stored_results():
-            listOfResults = element.fetchall()
+def main():
+    # Get path to the python script being run
+    dir = os.path.abspath(os.path.dirname(__file__))
 
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Something is wrong with your user name or password")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exist")
-        else:
-            print(err)
+    # Retrieve values from config file
+    with open(f'{dir}/appsettings.json', 'r') as f:
+        config = json.load(f)
+    # This used to be a global variable and now the function doesn't have access
+    #  to it, maybe making it into a class might solve it
 
-    finally:
-        cursor.close()
-        cnx.close()
-    
-    return listOfResults
+    dataAccess = MySqlDataAccess(config)
 
-days = 75
-queryDayStart = datetime.date(2020, 9, 23)
-# queryDayStart = datetime.date(2020, 10, 23)
-queryDayEnd = queryDayStart + datetime.timedelta(1)
-
-for day in range(days):
-    # Electricity chart for the day
-    listOfUse = []
-    
-    args = [queryDayStart, queryDayEnd]
-    listOfUse = callStoredProcedure('spElectricity_GetRecordsFromRange', args)
-
-    # Create and save a copy of the daily chart
-    dailyChart(dailyListOfUse=listOfUse, 
-               chartTitle=(f"{queryDayStart:%d %b %Y}"), 
-               plotLineColor=config['Charts']['electricity_color_line'], 
-               plotFillColor=config['Charts']['electricity_color_fill'], 
-               fileName=(f"{dir}/images/day/electricity-plot-{queryDayStart:%Y-%m-%d}.png"))
-
-    # Gas chart for the day
-    listOfUse = []
-    
-    args = [queryDayStart, queryDayEnd]
-    listOfUse = callStoredProcedure('spGas_GetRecordsFromRange', args)
-
-    # Create and save a copy of the daily chart
-    dailyChart(dailyListOfUse=listOfUse, 
-               chartTitle=(f"{queryDayStart:%d %b %Y}"), 
-               plotLineColor=config['Charts']['gas_color_line'], 
-               plotFillColor=config['Charts']['gas_color_fill'], 
-               fileName=(f"{dir}/images/day/gas-plot-{queryDayStart:%Y-%m-%d}.png"))
-
-    queryDayStart = queryDayStart + datetime.timedelta(1)
+    # Generate daily charts
+    days = 140
+    queryDayStart = datetime.date(2020, 9, 23)
+    # queryDayStart = datetime.date(2020, 10, 23)
+    # queryDayStart = datetime.date(2021, 3, 22)
     queryDayEnd = queryDayStart + datetime.timedelta(1)
 
+    for day in range(days):
+        # Electricity chart for the day
+        listOfUse = []
+        
+        args = [queryDayStart, queryDayEnd]
+        listOfUse = dataAccess.callStoredProcedure('spElectricity_GetRecordsFromRange', args, 'MySql')
 
-weeks = 13
-queryWeekStart = datetime.date(2020, 9, 21)
-# queryWeekStart = datetime.date(2020, 10, 23)
-queryWeekEnd = queryWeekStart + datetime.timedelta(6)
+        # Create and save a copy of the daily chart
+        dailyChart(dailyListOfUse=listOfUse, 
+                chartTitle=(f"{queryDayStart:%d %b %Y}"), 
+                plotLineColor=config['Charts']['electricity_color_line'], 
+                plotFillColor=config['Charts']['electricity_color_fill'], 
+                fileName=(f"{dir}/images/day/electricity-plot-{queryDayStart:%Y-%m-%d}.png"))
 
-for week in range(weeks):
-    # Electricity chart for the week
-    listOfUse = []
-    
-    args = [queryWeekStart, queryWeekEnd]
-    listOfUse = callStoredProcedure('spElectricity_GetRecordsFromRange', args)
+        # Gas chart for the day
+        listOfUse = []
+        
+        args = [queryDayStart, queryDayEnd]
+        listOfUse = dataAccess.callStoredProcedure('spGas_GetRecordsFromRange', args, 'MySql')
 
-    # Create and save a copy of the daily chart
-    weeklyChart(weeklyListOfUse=listOfUse, 
-               chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
-               plotLineColor=config['Charts']['electricity_color_line'], 
-               plotFillColor=config['Charts']['electricity_color_fill'], 
-               fileName=(f"{dir}/images/week/electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png"))
+        # Create and save a copy of the daily chart
+        dailyChart(dailyListOfUse=listOfUse, 
+                chartTitle=(f"{queryDayStart:%d %b %Y}"), 
+                plotLineColor=config['Charts']['gas_color_line'], 
+                plotFillColor=config['Charts']['gas_color_fill'], 
+                fileName=(f"{dir}/images/day/gas-plot-{queryDayStart:%Y-%m-%d}.png"))
 
-    # Gas chart for the week
-    listOfUse = []
-    
-    args = [queryWeekStart, queryWeekEnd]
-    listOfUse = callStoredProcedure('spGas_GetRecordsFromRange', args)
+        queryDayStart = queryDayStart + datetime.timedelta(1)
+        queryDayEnd = queryDayStart + datetime.timedelta(1)
 
-    # Create and save a copy of the daily chart
-    weeklyChart(weeklyListOfUse=listOfUse, 
-               chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
-               plotLineColor=config['Charts']['gas_color_line'], 
-               plotFillColor=config['Charts']['gas_color_fill'], 
-               fileName=(f"{dir}/images/week/gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png"))
-
-    queryWeekStart = queryWeekStart + datetime.timedelta(7)
+    # Generate weekly charts
+    weeks = 21
+    queryWeekStart = datetime.date(2020, 9, 21)
+    # queryWeekStart = datetime.date(2020, 10, 23)
+    # queryWeekStart = datetime.date(2021, 3, 22)
     queryWeekEnd = queryWeekStart + datetime.timedelta(6)
+
+    for week in range(weeks):
+        # Electricity chart for the week
+        listOfUse = []
+        
+        args = [queryWeekStart, queryWeekEnd]
+        listOfUse = dataAccess.callStoredProcedure('spElectricity_GetRecordsFromRange', args, 'MySql')
+
+        # Create and save a copy of the daily chart
+        weeklyChart(weeklyListOfUse=listOfUse, 
+                chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
+                plotLineColor=config['Charts']['electricity_color_line'], 
+                plotFillColor=config['Charts']['electricity_color_fill'], 
+                fileName=(f"{dir}/images/week/electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png"))
+
+        # Gas chart for the week
+        listOfUse = []
+        
+        args = [queryWeekStart, queryWeekEnd]
+        listOfUse = dataAccess.callStoredProcedure('spGas_GetRecordsFromRange', args, 'MySql')
+
+        # Create and save a copy of the daily chart
+        weeklyChart(weeklyListOfUse=listOfUse, 
+                chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
+                plotLineColor=config['Charts']['gas_color_line'], 
+                plotFillColor=config['Charts']['gas_color_fill'], 
+                fileName=(f"{dir}/images/week/gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png"))
+
+        queryWeekStart = queryWeekStart + datetime.timedelta(7)
+        queryWeekEnd = queryWeekStart + datetime.timedelta(6)
+
+if __name__ == "__main__":
+    main()
+
 
 # Go through the data and produce a daily chart
 #
@@ -220,4 +244,3 @@ for week in range(weeks):
 # update the letest date done in the database
 # 
 # finish 
-
