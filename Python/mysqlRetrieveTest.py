@@ -181,7 +181,7 @@ def main():
                 chartTitle=(f"{queryDayStart:%d %b %Y}"), 
                 plotLineColor=config['Charts']['electricity_color_line'], 
                 plotFillColor=config['Charts']['electricity_color_fill'], 
-                fileName=(f"{dir}/images/day/electricity-plot-{queryDayStart:%Y-%m-%d}.png"))
+                fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{queryDayStart:%Y-%m-%d}.png')))
 
         # Gas chart for the day
         listOfUse = []
@@ -194,7 +194,7 @@ def main():
                 chartTitle=(f"{queryDayStart:%d %b %Y}"), 
                 plotLineColor=config['Charts']['gas_color_line'], 
                 plotFillColor=config['Charts']['gas_color_fill'], 
-                fileName=(f"{dir}/images/day/gas-plot-{queryDayStart:%Y-%m-%d}.png"))
+                fileName=(os.path.join(dir, 'Images', 'day', f'gas-plot-{queryDayStart:%Y-%m-%d}.png')))
 
         queryDayStart = queryDayStart + datetime.timedelta(1)
         queryDayEnd = queryDayStart + datetime.timedelta(1)
@@ -218,7 +218,7 @@ def main():
                 chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
                 plotLineColor=config['Charts']['electricity_color_line'], 
                 plotFillColor=config['Charts']['electricity_color_fill'], 
-                fileName=(f"{dir}/images/week/electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png"))
+                fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png')))
 
         # Gas chart for the week
         listOfUse = []
@@ -231,7 +231,7 @@ def main():
                 chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
                 plotLineColor=config['Charts']['gas_color_line'], 
                 plotFillColor=config['Charts']['gas_color_fill'], 
-                fileName=(f"{dir}/images/week/gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png"))
+                fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png')))
 
         queryWeekStart = queryWeekStart + datetime.timedelta(7)
         queryWeekEnd = queryWeekStart + datetime.timedelta(6)
