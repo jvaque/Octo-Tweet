@@ -27,14 +27,15 @@ def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileNam
 
     x_indexes = np.arange(len(timeList))
 
-    plt.plot(timeList, energyList, color=plotLineColor)
-    plt.fill_between(timeList, energyList, color=plotFillColor)
+    fig, ax = plt.subplots()
+
+    ax.plot(timeList, energyList, color=plotLineColor)
+    ax.fill_between(timeList, energyList, color=plotFillColor)
 
     # plt.plot(x_indexes, energyList, color='#0000ff', marker='.')
 
     # plt.xticks(ticks=x_indexes, labels=timeList)
 
-    ax = plt.axes()
 
     hours = mdates.HourLocator()
     hours_fmt = mdates.DateFormatter('%H:%M')
@@ -44,6 +45,8 @@ def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileNam
 
     # Commented out the addition of margins as found them ugly
     # ax.margins(x=0, y=0)
+    ax.set_ylim(0, max(energyList)*1.2)
+    ax.set_xlim(min(timeList),max(timeList))
 
     plt.title(chartTitle)
     plt.xlabel('Time of day (h)')
