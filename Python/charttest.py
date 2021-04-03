@@ -30,20 +30,20 @@ with open(data) as csv_file:
         # Datetime is stored as current timezone datetime + offset to UTC
         #  from that timezone
 
-        ## No need for taing into acount the offset because the datetime is in local time
-        ##  offset only tells what timezone the datetime was taken
+        # This is an attempt to get the datetime + timezone information into
+        #  the same datetime python structure but it is so far 
+        #  unsuccessful/unnecessary as the datetime stored is in the local time
+        #  and the offset would only tell what timezone the datetime measurement
+        #  was taken
         # if row[3][0] != "-":
         #     extraChar = "+"
         # else:
         #     extraChar = ""
         # datetimeFrom = datetime.fromisoformat(row[2]+extraChar+row[3])
-        datetimeFrom = datetime.fromisoformat(row[2])
+        # # datetimeFromTimestamp = datetime.fromisoformat("2020-09-23 01:00:00+00:00:00")
+        # # print(datetimeFromTimestamp)
 
-        # if row[5][0] != "-":
-        #     extraChar = "+"
-        # else:
-        #     extraChar = ""
-        # datetimeTo = datetime.fromisoformat(row[4]+extraChar+row[5])
+        datetimeFrom = datetime.fromisoformat(row[2])
         datetimeTo = datetime.fromisoformat(row[4])
 
         listOfUse.append([int(row[0]), float(row[1]), datetimeFrom, row[3], datetimeTo, row[5]])
@@ -54,9 +54,6 @@ timeList = []
 for element in listOfUse:
     energyList.append(element[1])
     timeList.append(element[2])
-
-# datetimeFromTimestamp = datetime.fromisoformat("2020-09-23 01:00:00+00:00:00")
-# print(datetimeFromTimestamp)
 
 x_indexes = np.arange(len(timeList))
 
