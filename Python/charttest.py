@@ -9,11 +9,14 @@ import json
 data = 'Python/data2electricBoogaloo.csv'
 config_color_line = "#e9f50a"
 config_color_fill = "#eff853"
+chart_ylabel = 'Electricity Consumption (kWh)'
+
 
 # # Gas
 # data = 'Python/data2gasBoogaloo.csv'
 # config_color_line = "#368ee0"
 # config_color_fill = "#72afe9"
+# chart_ylabel = 'Gas Consumption (kWh)'
 
 
 variable_date_from = datetime.fromisoformat("2020-09-24 00:00:00")
@@ -57,14 +60,14 @@ for element in listOfUse:
 
 x_indexes = np.arange(len(timeList))
 
-plt.plot(timeList, energyList, color=config_color_line)
-plt.fill_between(timeList, energyList, color=config_color_fill)
+fig, ax = plt.subplots()
+
+ax.plot(timeList, energyList, color=config_color_line)
+ax.fill_between(timeList, energyList, color=config_color_fill)
 
 # plt.plot(x_indexes, energyList, color='#0000ff', marker='.')
 
 # plt.xticks(ticks=x_indexes, labels=timeList)
-
-ax = plt.axes()
 
 hours = mdates.HourLocator()
 hours_fmt = mdates.DateFormatter('%H:%M')
@@ -74,7 +77,7 @@ ax.xaxis.set_minor_locator(hours)
 
 plt.title('24th Sept 2020')
 plt.xlabel('Time of day (h)')
-plt.ylabel('Energy Consumption (kWh)')
+plt.ylabel(chart_ylabel)
 
 # plt.legend()
 
