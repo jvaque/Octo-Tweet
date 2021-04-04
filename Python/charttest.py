@@ -68,7 +68,7 @@ ax.fill_between(timeList, energyList, color=config_color_fill)
 
 # plt.xticks(ticks=x_indexes, labels=timeList)
 
-ax.set_ylim(0, max(energyList)*1.2)
+ax.set_ylim(0, max(energyList)*1.1)
 ax.set_xlim(query_day_from, query_day_to)
 
 hours = mdates.HourLocator()
@@ -85,6 +85,6 @@ plt.ylabel(chart_ylabel)
 
 # plt.grid(True)
 
-# plt.savefig('plot.png')
+plt.savefig('plot.svg')
 
 plt.show()
