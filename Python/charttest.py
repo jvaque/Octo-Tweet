@@ -77,9 +77,9 @@ hours_fmt = mdates.DateFormatter('%H:%M')
 ax.xaxis.set_major_formatter(hours_fmt)
 ax.xaxis.set_minor_locator(hours)
 
-plt.title('24th Sept 2020')
-plt.xlabel('Time of day (h)')
-plt.ylabel(chart_ylabel)
+ax.set_title('24th Sept 2020')
+ax.set_xlabel('Time of day (h)')
+ax.set_ylabel(chart_ylabel)
 
 # plt.legend()
 
