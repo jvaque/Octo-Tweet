@@ -18,7 +18,7 @@ BEGIN
     FROM
         `Gas`
     WHERE
-        (`gas_interval_start_datetime` >= Interval_datetime_from)
+        (`gas_interval_end_datetime` >= Interval_datetime_from)
         AND
         (`gas_interval_end_datetime` <= Interval_datetime_to)
     ORDER BY

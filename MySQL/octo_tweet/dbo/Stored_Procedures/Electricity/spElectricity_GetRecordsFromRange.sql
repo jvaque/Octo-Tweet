@@ -18,7 +18,7 @@ BEGIN
     FROM
         `Electricity`
     WHERE
-        (`electricity_interval_start_datetime` >= Interval_datetime_from)
+        (`electricity_interval_end_datetime` >= Interval_datetime_from)
         AND
         (`electricity_interval_end_datetime` <= Interval_datetime_to)
     ORDER BY
