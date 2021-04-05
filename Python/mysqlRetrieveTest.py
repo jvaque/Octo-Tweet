@@ -45,7 +45,7 @@ def customStepChart(listOfUse, chartTitle, chartLabelX, chartLabelY,
         energyUseListPlot.append(element[1])
         timeListPlot.append(element[4])
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(16,9))
 
     ax.plot(timeListPlot, energyUseListPlot, color=plotColorLine)
     ax.fill_between(timeListPlot, energyUseListPlot, color=plotColorFill)
@@ -135,11 +135,12 @@ def main():
 
     # Generate daily charts
     days = 140
+    # days = 0 # To easily skip when debugging
     # queryDayStart = datetime.date(2020, 9, 23)
     queryDayStart = datetime.date(2020, 9, 25)
     # queryDayStart = datetime.date(2020, 10, 23)
     # queryDayStart = datetime.date(2021, 3, 22)
-    queryDayEnd = queryDayStart + datetime.timedelta(1)
+    queryDayEnd = queryDayStart + datetime.timedelta(days=1)
 
     for day in range(days):
         # Electricity chart for the day
@@ -186,15 +187,17 @@ def main():
             majorFormatterAxisX=mdates.DateFormatter('%H:%M')
         )
 
-        queryDayStart = queryDayStart + datetime.timedelta(1)
-        queryDayEnd = queryDayStart + datetime.timedelta(1)
+        queryDayStart = queryDayStart + datetime.timedelta(days=1)
+        queryDayEnd = queryDayStart + datetime.timedelta(days=1)
 
     # Generate weekly charts
     weeks = 30
+    # weeks = 0 # To easily skip when debugging
     queryWeekStart = datetime.date(2020, 9, 21)
     # queryWeekStart = datetime.date(2020, 10, 23)
     # queryWeekStart = datetime.date(2021, 3, 22)
-    queryWeekEnd = queryWeekStart + datetime.timedelta(6)
+    queryWeekEnd = queryWeekStart + datetime.timedelta(weeks=1)
+    titleDayWeekEnd = queryWeekStart + datetime.timedelta(days=6)
 
     for week in range(weeks):
         # Electricity chart for the week
@@ -206,15 +209,15 @@ def main():
         # Create and save a copy of the daily chart
         customStepChart(
             listOfUse=listOfUse,
-            chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"),
+            chartTitle=(f"{queryWeekStart:%d %b %Y}-{titleDayWeekEnd:%d %b %Y}"),
             chartLabelX='Day (h)',
             chartLabelY='Electricity Consumption (kWh)',
             plotColorLine=config['Charts']['electricity_color_line'],
             plotColorFill=config['Charts']['electricity_color_fill'],
             plotDateFrom=queryWeekStart,
             plotDateTo=queryWeekEnd,
-            fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png')),
-            # fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.svg')),
+            fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.png')),
+            # fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.svg')),
             majorLocatorAxisX=mdates.DayLocator(),
             minorLocatorAxisX=mdates.HourLocator(interval=6),
             majorFormatterAxisX=mdates.DateFormatter('%a %d'),
@@ -230,23 +233,92 @@ def main():
         # Create and save a copy of the daily chart
         customStepChart(
             listOfUse=listOfUse,
-            chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"),
+            chartTitle=(f"{queryWeekStart:%d %b %Y}-{titleDayWeekEnd:%d %b %Y}"),
             chartLabelX='Day (h)',
             chartLabelY='Gas Consumption (kWh)',
             plotColorLine=config['Charts']['gas_color_line'],
             plotColorFill=config['Charts']['gas_color_fill'],
             plotDateFrom=queryWeekStart,
             plotDateTo=queryWeekEnd,
-            fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png')),
-            # fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.svg')),
+            fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.png')),
+            # fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.svg')),
             majorLocatorAxisX=mdates.DayLocator(),
             minorLocatorAxisX=mdates.HourLocator(interval=6),
             majorFormatterAxisX=mdates.DateFormatter('%a %d'),
             minorFormatterAxisX=mdates.DateFormatter('%H')
         )
 
-        queryWeekStart = queryWeekStart + datetime.timedelta(7)
-        queryWeekEnd = queryWeekStart + datetime.timedelta(6)
+        queryWeekStart = queryWeekStart + datetime.timedelta(weeks=1)
+        queryWeekEnd = queryWeekStart + datetime.timedelta(weeks=1)
+        titleDayWeekEnd = queryWeekStart + datetime.timedelta(days=6)
+
+    # Generate monthly charts
+    months = 12
+    # months = 0 # To easily skip when debugging
+    currentYear = 2020
+    currentMonth = 9
+    queryMonthStart = datetime.date(currentYear, currentMonth, 1)
+    queryMonthEnd = datetime.date(currentYear, currentMonth+1, 1)
+    # queryMonthStart = datetime.date(2020, 10, 1)
+    # queryMonthStart = datetime.date(2021, 3, 1)
+
+    for month in range(months):
+        # Electricity chart for the month
+        listOfUse = []
+        
+        args = [queryMonthStart, queryMonthEnd]
+        listOfUse = dataAccess.callStoredProcedure('spElectricity_GetRecordsFromRange', args, 'MySql')
+
+        # Create and save a copy of the daily chart
+        customStepChart(
+            listOfUse=listOfUse,
+            chartTitle=(f"{queryMonthStart:%b %Y}"),
+            chartLabelX='Month',
+            chartLabelY='Electricity Consumption (kWh)',
+            plotColorLine=config['Charts']['electricity_color_line'],
+            plotColorFill=config['Charts']['electricity_color_fill'],
+            plotDateFrom=queryMonthStart,
+            plotDateTo=queryMonthEnd,
+            fileName=(os.path.join(dir, 'Images', 'month', f'electricity-plot-{queryMonthStart:%Y-%m}.png')),
+            # fileName=(os.path.join(dir, 'Images', 'month', f'electricity-plot-{queryMonthStart:%Y-%m}.svg')),
+            majorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
+            minorLocatorAxisX=mdates.DayLocator(),
+            majorFormatterAxisX=mdates.DateFormatter('%d'),
+            minorFormatterAxisX=mdates.DateFormatter('%d')
+        )
+
+        # Gas chart for the month
+        listOfUse = []
+        
+        args = [queryMonthStart, queryMonthEnd]
+        listOfUse = dataAccess.callStoredProcedure('spGas_GetRecordsFromRange', args, 'MySql')
+
+        # Create and save a copy of the daily chart
+        customStepChart(
+            listOfUse=listOfUse,
+            chartTitle=(f"{queryMonthStart:%b %Y}"),
+            chartLabelX='Month',
+            chartLabelY='Gas Consumption (kWh)',
+            plotColorLine=config['Charts']['gas_color_line'],
+            plotColorFill=config['Charts']['gas_color_fill'],
+            plotDateFrom=queryMonthStart,
+            plotDateTo=queryMonthEnd,
+            fileName=(os.path.join(dir, 'Images', 'month', f'gas-plot-{queryMonthStart:%Y-%m}.png')),
+            # fileName=(os.path.join(dir, 'Images', 'month', f'gas-plot-{queryMonthStart:%Y-%m}.svg')),
+            majorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
+            minorLocatorAxisX=mdates.DayLocator(),
+            majorFormatterAxisX=mdates.DateFormatter('%d'),
+            minorFormatterAxisX=mdates.DateFormatter('%d')
+        )
+
+        currentMonth +=1
+        queryMonthStart = datetime.date(currentYear, currentMonth, 1)
+        if (currentMonth >= 12):
+            currentMonth = 0
+            currentYear +=1
+        queryMonthEnd = datetime.date(currentYear, currentMonth+1, 1)
+
+
 
 if __name__ == "__main__":
     main()
