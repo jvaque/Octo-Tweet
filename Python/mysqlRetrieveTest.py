@@ -2,6 +2,7 @@ import os
 import datetime
 import mysql.connector
 from mysql.connector import errorcode
+from tqdm import tqdm
 
 
 import numpy as np
@@ -142,7 +143,8 @@ def main():
     # queryDayStart = datetime.date(2021, 3, 22)
     queryDayEnd = queryDayStart + datetime.timedelta(days=1)
 
-    for day in range(days):
+    print('Generating batch of day charts')
+    for day in tqdm(range(days)):
         # Electricity chart for the day
         listOfUse = []
         
@@ -199,7 +201,8 @@ def main():
     queryWeekEnd = queryWeekStart + datetime.timedelta(weeks=1)
     titleDayWeekEnd = queryWeekStart + datetime.timedelta(days=6)
 
-    for week in range(weeks):
+    print('Generating batch of weekly charts')
+    for week in tqdm(range(weeks)):
         # Electricity chart for the week
         listOfUse = []
         
@@ -262,7 +265,8 @@ def main():
     # queryMonthStart = datetime.date(2020, 10, 1)
     # queryMonthStart = datetime.date(2021, 3, 1)
 
-    for month in range(months):
+    print('Generating batch of monthly charts')
+    for month in tqdm(range(months)):
         # Electricity chart for the month
         listOfUse = []
         
