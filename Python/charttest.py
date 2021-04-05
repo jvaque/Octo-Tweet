@@ -18,6 +18,8 @@ chart_ylabel = 'Electricity Consumption (kWh)'
 # config_color_fill = "#72afe9"
 # chart_ylabel = 'Gas Consumption (kWh)'
 
+chart_title = '24th Sept 2020'
+
 query_day_from = datetime.date(2020, 9, 24)
 query_day_to = query_day_from + datetime.timedelta(1)
 
@@ -74,11 +76,12 @@ ax.xaxis.set_minor_locator(hours)
 
 ax.set_xlabel('Time of day (h)')
 ax.set_ylabel(chart_ylabel)
-ax.set_title('24th Sept 2020')
+ax.set_title(chart_title)
 
 # ax.legend()
 
-# ax.grid(True)
+# ax.grid()
+# ax.grid(axis='y', color='#f5f4d7', linestyle='--')
 
 # plt.savefig('plot.svg')
 # plt.savefig('plot.png')

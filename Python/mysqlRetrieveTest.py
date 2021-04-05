@@ -15,15 +15,15 @@ import json
 # chartTitle = f"{queryDayStart:%d %b %Y}"
 # plotLineColor = config['Charts']['electricity_color_line'])
 # plotFillColor = config['Charts']['electricity_color_fill'])
-# fileName = f"{dir}/images/day/electricity-plot-{queryDayStart:%Y-%m-%d}.png"
+# fileName = f"{dir}/images/day/electricity-plot-{queryDayStart:%Y-%m-%d}.svg"
 
-def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileName):
+def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileName, chartFrom):
     energyList = []
     timeList = []
 
     for timePeriod in dailyListOfUse:
         energyList.append(timePeriod[1])
-        timeList.append(timePeriod[2])
+        timeList.append(timePeriod[4])
 
     x_indexes = np.arange(len(timeList))
 
@@ -46,7 +46,7 @@ def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileNam
     # Commented out the addition of margins as found them ugly
     # ax.margins(x=0, y=0)
     ax.set_ylim(0, max(energyList)*1.2)
-    ax.set_xlim(min(timeList),max(timeList))
+    ax.set_xlim(chartFrom,chartFrom + datetime.timedelta(1))
 
     plt.title(chartTitle)
     plt.xlabel('Time of day (h)')
@@ -63,26 +63,28 @@ def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileNam
 # chartTitle = f"{queryWeekStart:%d %b %Y}"
 # plotLineColor = config['Charts']['electricity_color_line'])
 # plotFillColor = config['Charts']['electricity_color_fill'])
-# fileName = f"{dir}/images/week/electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png"
+# fileName = f"{dir}/images/week/electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.svg"
 
-def weeklyChart(weeklyListOfUse, chartTitle, plotLineColor, plotFillColor, fileName):
+def weeklyChart(weeklyListOfUse, chartTitle, plotLineColor, plotFillColor, fileName, chartFrom):
     energyList = []
     timeList = []
 
     for timePeriod in weeklyListOfUse:
         energyList.append(timePeriod[1])
-        timeList.append(timePeriod[2])
+        timeList.append(timePeriod[4])
 
     x_indexes = np.arange(len(timeList))
 
-    plt.plot(timeList, energyList, color=plotLineColor)
-    plt.fill_between(timeList, energyList, color=plotFillColor)
+    fig, ax = plt.subplots()
+    
+    ax.plot(timeList, energyList, color=plotLineColor)
+    ax.fill_between(timeList, energyList, color=plotFillColor)
 
     # plt.plot(x_indexes, energyList, color='#0000ff', marker='.')
 
     # plt.xticks(ticks=x_indexes, labels=timeList)
 
-    ax = plt.axes()
+    # ax = plt.axes()
 
     hours = mdates.HourLocator(interval=6)
     hour_fmt = mdates.DateFormatter('%H')
@@ -93,6 +95,10 @@ def weeklyChart(weeklyListOfUse, chartTitle, plotLineColor, plotFillColor, fileN
     ax.xaxis.set_minor_locator(hours)
     ax.xaxis.set_major_formatter(day_fmt)
     ax.xaxis.set_minor_formatter(hour_fmt)
+
+
+    ax.set_ylim(0, max(energyList)*1.2)
+    ax.set_xlim(chartFrom,chartFrom + datetime.timedelta(6))
 
     # Commented out the addition of margins as found them ugly
     # ax.margins(x=0, y=0)
@@ -167,7 +173,8 @@ def main():
 
     # Generate daily charts
     days = 140
-    queryDayStart = datetime.date(2020, 9, 23)
+    # queryDayStart = datetime.date(2020, 9, 23)
+    queryDayStart = datetime.date(2020, 9, 25)
     # queryDayStart = datetime.date(2020, 10, 23)
     # queryDayStart = datetime.date(2021, 3, 22)
     queryDayEnd = queryDayStart + datetime.timedelta(1)
@@ -184,7 +191,8 @@ def main():
                 chartTitle=(f"{queryDayStart:%d %b %Y}"), 
                 plotLineColor=config['Charts']['electricity_color_line'], 
                 plotFillColor=config['Charts']['electricity_color_fill'], 
-                fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{queryDayStart:%Y-%m-%d}.png')))
+                fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{queryDayStart:%Y-%m-%d}.svg')),
+                chartFrom=queryDayStart)
 
         # Gas chart for the day
         listOfUse = []
@@ -197,13 +205,14 @@ def main():
                 chartTitle=(f"{queryDayStart:%d %b %Y}"), 
                 plotLineColor=config['Charts']['gas_color_line'], 
                 plotFillColor=config['Charts']['gas_color_fill'], 
-                fileName=(os.path.join(dir, 'Images', 'day', f'gas-plot-{queryDayStart:%Y-%m-%d}.png')))
+                fileName=(os.path.join(dir, 'Images', 'day', f'gas-plot-{queryDayStart:%Y-%m-%d}.svg')),
+                chartFrom=queryDayStart)
 
         queryDayStart = queryDayStart + datetime.timedelta(1)
         queryDayEnd = queryDayStart + datetime.timedelta(1)
 
     # Generate weekly charts
-    weeks = 21
+    weeks = 30
     queryWeekStart = datetime.date(2020, 9, 21)
     # queryWeekStart = datetime.date(2020, 10, 23)
     # queryWeekStart = datetime.date(2021, 3, 22)
@@ -221,7 +230,8 @@ def main():
                 chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
                 plotLineColor=config['Charts']['electricity_color_line'], 
                 plotFillColor=config['Charts']['electricity_color_fill'], 
-                fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png')))
+                fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.svg')),
+                chartFrom=queryWeekStart)
 
         # Gas chart for the week
         listOfUse = []
@@ -234,7 +244,8 @@ def main():
                 chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
                 plotLineColor=config['Charts']['gas_color_line'], 
                 plotFillColor=config['Charts']['gas_color_fill'], 
-                fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png')))
+                fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.svg'))
+                ,chartFrom=queryWeekStart)
 
         queryWeekStart = queryWeekStart + datetime.timedelta(7)
         queryWeekEnd = queryWeekStart + datetime.timedelta(6)
