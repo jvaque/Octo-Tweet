@@ -76,9 +76,9 @@ ax.set_xlabel('Time of day (h)')
 ax.set_ylabel(chart_ylabel)
 ax.set_title('24th Sept 2020')
 
-# plt.legend()
+# ax.legend()
 
-# plt.grid(True)
+# ax.grid(True)
 
 # plt.savefig('plot.svg')
 # plt.savefig('plot.png')
