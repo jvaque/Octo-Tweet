@@ -50,41 +50,37 @@ with open(data) as csv_file:
 
         listOfUse.append([int(row[0]), float(row[1]), datetimeFrom, row[3], datetimeTo, row[5]])
 
-energyList = []
-timeList = []
+energyUseListDisplay = []
+timeListDisplay = []
 
 for element in listOfUse:
-    energyList.append(element[1])
-    timeList.append(element[4])
-
-x_indexes = np.arange(len(timeList))
+    energyUseListDisplay.append(element[1])
+    timeListDisplay.append(element[2])
+    energyUseListDisplay.append(element[1])
+    timeListDisplay.append(element[4])
 
 fig, ax = plt.subplots()
 
-ax.plot(timeList, energyList, color=config_color_line)
-ax.fill_between(timeList, energyList, color=config_color_fill)
+ax.plot(timeListDisplay, energyUseListDisplay, color=config_color_line)
+ax.fill_between(timeListDisplay, energyUseListDisplay, color=config_color_fill)
 
-# plt.plot(x_indexes, energyList, color='#0000ff', marker='.')
-
-# plt.xticks(ticks=x_indexes, labels=timeList)
-
-ax.set_ylim(0, max(energyList)*1.1)
 ax.set_xlim(query_day_from, query_day_to)
+ax.set_ylim(0, max(energyUseListDisplay)*1.1)
 
 hours = mdates.HourLocator()
 hours_fmt = mdates.DateFormatter('%H:%M')
-# ax.set_xtics(x_indexes)
 ax.xaxis.set_major_formatter(hours_fmt)
 ax.xaxis.set_minor_locator(hours)
 
-ax.set_title('24th Sept 2020')
 ax.set_xlabel('Time of day (h)')
 ax.set_ylabel(chart_ylabel)
+ax.set_title('24th Sept 2020')
 
 # plt.legend()
 
 # plt.grid(True)
 
-plt.savefig('plot.svg')
+# plt.savefig('plot.svg')
+# plt.savefig('plot.png')
 
 plt.show()
