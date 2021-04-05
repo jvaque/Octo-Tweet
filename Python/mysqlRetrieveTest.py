@@ -12,108 +12,70 @@ import matplotlib.dates as mdates
 import json
 
 # ------------------------------------------------------------------------------
-# chartTitle = f"{queryDayStart:%d %b %Y}"
-# plotLineColor = config['Charts']['electricity_color_line'])
-# plotFillColor = config['Charts']['electricity_color_fill'])
-# fileName = f"{dir}/images/day/electricity-plot-{queryDayStart:%Y-%m-%d}.svg"
+def customStepChart(listOfUse, chartTitle, chartLabelX, chartLabelY,
+                    plotColorLine, plotColorFill, plotDateFrom, plotDateTo, fileName,
+                    majorLocatorAxisX=None, minorLocatorAxisX=None,
+                    majorFormatterAxisX=None, minorFormatterAxisX=None):
+    '''
+    listOfUse: List of consumptions ordered by date as received from the database\n
+    chartTitle: Title for the chart\n
+    chartLabelX: Label for the x axis label\n
+    chartLabelY: Lable for the y axis label\n
+    plotColorLine: Color to be used for the line in the chart\n
+    plotColorFill: Color to fill the area between the line and the x axis\n
+    plotDateFrom: Start date to show in the plot graph\n
+    plotDateTo: End date to show in the plot graph\n
+    fileName: Full path and filename of where to save the chart\n
+    majorLocatorAxisX=None: (Optional) Choose the location of the x axis major
+    locators\n
+    minorLocatorAxisX=None: (Optional) Choose the location of the x axis minor
+    locators\n
+    majorFormatterAxisX=None: (Optional) Choose the text format to display on 
+    the x axis for the major locators\n
+    minorFormatterAxisX=Non: (Optional) Choose the text format to display on 
+    the x asis for the minor locators
+    '''
 
-def dailyChart(dailyListOfUse, chartTitle, plotLineColor, plotFillColor, fileName, chartFrom):
-    energyList = []
-    timeList = []
+    energyUseListPlot = []
+    timeListPlot = []
 
-    for timePeriod in dailyListOfUse:
-        energyList.append(timePeriod[1])
-        timeList.append(timePeriod[4])
-
-    x_indexes = np.arange(len(timeList))
-
-    fig, ax = plt.subplots()
-
-    ax.plot(timeList, energyList, color=plotLineColor)
-    ax.fill_between(timeList, energyList, color=plotFillColor)
-
-    # plt.plot(x_indexes, energyList, color='#0000ff', marker='.')
-
-    # plt.xticks(ticks=x_indexes, labels=timeList)
-
-
-    hours = mdates.HourLocator()
-    hours_fmt = mdates.DateFormatter('%H:%M')
-    # ax.set_xtics(x_indexes)
-    ax.xaxis.set_major_formatter(hours_fmt)
-    ax.xaxis.set_minor_locator(hours)
-
-    # Commented out the addition of margins as found them ugly
-    # ax.margins(x=0, y=0)
-    ax.set_ylim(0, max(energyList)*1.2)
-    ax.set_xlim(chartFrom,chartFrom + datetime.timedelta(1))
-
-    plt.title(chartTitle)
-    plt.xlabel('Time of day (h)')
-    plt.ylabel('Energy Consumption (kWh)')
-
-    # plt.legend()
-
-    # plt.grid(True)
-
-    plt.savefig(fileName)
-    # plt.show() # commented out when not being tested
-    plt.close()
-# ------------------------------------------------------------------------------
-# chartTitle = f"{queryWeekStart:%d %b %Y}"
-# plotLineColor = config['Charts']['electricity_color_line'])
-# plotFillColor = config['Charts']['electricity_color_fill'])
-# fileName = f"{dir}/images/week/electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.svg"
-
-def weeklyChart(weeklyListOfUse, chartTitle, plotLineColor, plotFillColor, fileName, chartFrom):
-    energyList = []
-    timeList = []
-
-    for timePeriod in weeklyListOfUse:
-        energyList.append(timePeriod[1])
-        timeList.append(timePeriod[4])
-
-    x_indexes = np.arange(len(timeList))
+    for element in listOfUse:
+        energyUseListPlot.append(element[1])
+        timeListPlot.append(element[2])
+        energyUseListPlot.append(element[1])
+        timeListPlot.append(element[4])
 
     fig, ax = plt.subplots()
-    
-    ax.plot(timeList, energyList, color=plotLineColor)
-    ax.fill_between(timeList, energyList, color=plotFillColor)
 
-    # plt.plot(x_indexes, energyList, color='#0000ff', marker='.')
+    ax.plot(timeListPlot, energyUseListPlot, color=plotColorLine)
+    ax.fill_between(timeListPlot, energyUseListPlot, color=plotColorFill)
 
-    # plt.xticks(ticks=x_indexes, labels=timeList)
+    ax.set_xlim(plotDateFrom, plotDateTo)
+    if (len(energyUseListPlot) > 0):
+        ax.set_ylim(0, max(energyUseListPlot)*1.1)
 
-    # ax = plt.axes()
+    if (majorLocatorAxisX != None):
+        ax.xaxis.set_major_locator(majorLocatorAxisX)
+    if (minorLocatorAxisX != None):
+        ax.xaxis.set_minor_locator(minorLocatorAxisX)
+    if (majorFormatterAxisX != None):
+        ax.xaxis.set_major_formatter(majorFormatterAxisX)
+    if (minorFormatterAxisX != None):
+        ax.xaxis.set_minor_formatter(minorFormatterAxisX)
 
-    hours = mdates.HourLocator(interval=6)
-    hour_fmt = mdates.DateFormatter('%H')
-    days = mdates.DayLocator()
-    day_fmt = mdates.DateFormatter('%a %d')
-    # ax.set_xtics(x_indexes)
-    ax.xaxis.set_major_locator(days)
-    ax.xaxis.set_minor_locator(hours)
-    ax.xaxis.set_major_formatter(day_fmt)
-    ax.xaxis.set_minor_formatter(hour_fmt)
+    ax.set_title(chartTitle)
+    ax.set_xlabel(chartLabelX)
+    ax.set_ylabel(chartLabelY)
 
+    # ax.legend()
 
-    ax.set_ylim(0, max(energyList)*1.2)
-    ax.set_xlim(chartFrom,chartFrom + datetime.timedelta(6))
-
-    # Commented out the addition of margins as found them ugly
-    # ax.margins(x=0, y=0)
-
-    plt.title(chartTitle)
-    plt.xlabel('Time of day (h)')
-    plt.ylabel('Energy Consumption (kWh)')
-
-    # plt.legend()
-
-    # plt.grid(True)
+    # ax.grid()
+    # ax.grid(axis='y', color='#f5f4d7', linestyle='--')
 
     plt.savefig(fileName)
-    # plt.show() # commented out when not being tested
+    # plt.show()
     plt.close()
+
 # ------------------------------------------------------------------------------
 class MySqlDataAccess:
     def __init__(self, config):
@@ -187,12 +149,20 @@ def main():
         listOfUse = dataAccess.callStoredProcedure('spElectricity_GetRecordsFromRange', args, 'MySql')
 
         # Create and save a copy of the daily chart
-        dailyChart(dailyListOfUse=listOfUse, 
-                chartTitle=(f"{queryDayStart:%d %b %Y}"), 
-                plotLineColor=config['Charts']['electricity_color_line'], 
-                plotFillColor=config['Charts']['electricity_color_fill'], 
-                fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{queryDayStart:%Y-%m-%d}.svg')),
-                chartFrom=queryDayStart)
+        customStepChart(
+            listOfUse=listOfUse,
+            chartTitle=(f"{queryDayStart:%d %b %Y}"),
+            chartLabelX='Time of day (h)',
+            chartLabelY='Electricity Consumption (kWh)',
+            plotColorLine=config['Charts']['electricity_color_line'],
+            plotColorFill=config['Charts']['electricity_color_fill'],
+            plotDateFrom=queryDayStart,
+            plotDateTo=queryDayEnd,
+            fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{queryDayStart:%Y-%m-%d}.png')),
+            # fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{queryDayStart:%Y-%m-%d}.svg')),
+            minorLocatorAxisX=mdates.HourLocator(),
+            majorFormatterAxisX=mdates.DateFormatter('%H:%M')
+        )
 
         # Gas chart for the day
         listOfUse = []
@@ -201,12 +171,20 @@ def main():
         listOfUse = dataAccess.callStoredProcedure('spGas_GetRecordsFromRange', args, 'MySql')
 
         # Create and save a copy of the daily chart
-        dailyChart(dailyListOfUse=listOfUse, 
-                chartTitle=(f"{queryDayStart:%d %b %Y}"), 
-                plotLineColor=config['Charts']['gas_color_line'], 
-                plotFillColor=config['Charts']['gas_color_fill'], 
-                fileName=(os.path.join(dir, 'Images', 'day', f'gas-plot-{queryDayStart:%Y-%m-%d}.svg')),
-                chartFrom=queryDayStart)
+        customStepChart(
+            listOfUse=listOfUse,
+            chartTitle=(f"{queryDayStart:%d %b %Y}"),
+            chartLabelX='Time of day (h)',
+            chartLabelY='Gas Consumption (kWh)',
+            plotColorLine=config['Charts']['gas_color_line'],
+            plotColorFill=config['Charts']['gas_color_fill'],
+            plotDateFrom=queryDayStart,
+            plotDateTo=queryDayEnd,
+            fileName=(os.path.join(dir, 'Images', 'day', f'gas-plot-{queryDayStart:%Y-%m-%d}.png')),
+            # fileName=(os.path.join(dir, 'Images', 'day', f'gas-plot-{queryDayStart:%Y-%m-%d}.svg')),
+            minorLocatorAxisX=mdates.HourLocator(),
+            majorFormatterAxisX=mdates.DateFormatter('%H:%M')
+        )
 
         queryDayStart = queryDayStart + datetime.timedelta(1)
         queryDayEnd = queryDayStart + datetime.timedelta(1)
@@ -226,12 +204,22 @@ def main():
         listOfUse = dataAccess.callStoredProcedure('spElectricity_GetRecordsFromRange', args, 'MySql')
 
         # Create and save a copy of the daily chart
-        weeklyChart(weeklyListOfUse=listOfUse, 
-                chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
-                plotLineColor=config['Charts']['electricity_color_line'], 
-                plotFillColor=config['Charts']['electricity_color_fill'], 
-                fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.svg')),
-                chartFrom=queryWeekStart)
+        customStepChart(
+            listOfUse=listOfUse,
+            chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"),
+            chartLabelX='Day (h)',
+            chartLabelY='Electricity Consumption (kWh)',
+            plotColorLine=config['Charts']['electricity_color_line'],
+            plotColorFill=config['Charts']['electricity_color_fill'],
+            plotDateFrom=queryWeekStart,
+            plotDateTo=queryWeekEnd,
+            fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png')),
+            # fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.svg')),
+            majorLocatorAxisX=mdates.DayLocator(),
+            minorLocatorAxisX=mdates.HourLocator(interval=6),
+            majorFormatterAxisX=mdates.DateFormatter('%a %d'),
+            minorFormatterAxisX=mdates.DateFormatter('%H')
+        )
 
         # Gas chart for the week
         listOfUse = []
@@ -240,12 +228,22 @@ def main():
         listOfUse = dataAccess.callStoredProcedure('spGas_GetRecordsFromRange', args, 'MySql')
 
         # Create and save a copy of the daily chart
-        weeklyChart(weeklyListOfUse=listOfUse, 
-                chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"), 
-                plotLineColor=config['Charts']['gas_color_line'], 
-                plotFillColor=config['Charts']['gas_color_fill'], 
-                fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.svg'))
-                ,chartFrom=queryWeekStart)
+        customStepChart(
+            listOfUse=listOfUse,
+            chartTitle=(f"{queryWeekStart:%d %b %Y}-{queryWeekEnd:%d %b %Y}"),
+            chartLabelX='Day (h)',
+            chartLabelY='Gas Consumption (kWh)',
+            plotColorLine=config['Charts']['gas_color_line'],
+            plotColorFill=config['Charts']['gas_color_fill'],
+            plotDateFrom=queryWeekStart,
+            plotDateTo=queryWeekEnd,
+            fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.png')),
+            # fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{queryWeekEnd:%Y-%m-%d}.svg')),
+            majorLocatorAxisX=mdates.DayLocator(),
+            minorLocatorAxisX=mdates.HourLocator(interval=6),
+            majorFormatterAxisX=mdates.DateFormatter('%a %d'),
+            minorFormatterAxisX=mdates.DateFormatter('%H')
+        )
 
         queryWeekStart = queryWeekStart + datetime.timedelta(7)
         queryWeekEnd = queryWeekStart + datetime.timedelta(6)
