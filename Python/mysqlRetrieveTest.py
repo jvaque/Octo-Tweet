@@ -64,6 +64,11 @@ def customStepChart(listOfUse, chartTitle, chartLabelX, chartLabelY,
     if (minorFormatterAxisX != None):
         ax.xaxis.set_minor_formatter(minorFormatterAxisX)
 
+    ax.tick_params(which='major', width=1.0)
+    ax.tick_params(which='major', length=10)
+    ax.tick_params(which='minor', width=1.0, labelsize=10)
+    ax.tick_params(which='minor', length=5, labelsize=10, labelcolor='0.25')
+
     ax.set_title(chartTitle)
     ax.set_xlabel(chartLabelX)
     ax.set_ylabel(chartLabelY)
@@ -135,7 +140,7 @@ def main():
     dataAccess = MySqlDataAccess(config)
 
     # Generate daily charts
-    days = 140
+    days = 200
     # days = 0 # To easily skip when debugging
     # queryDayStart = datetime.date(2020, 9, 23)
     queryDayStart = datetime.date(2020, 9, 25)
