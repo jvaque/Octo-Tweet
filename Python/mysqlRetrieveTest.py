@@ -168,6 +168,7 @@ def main():
             plotDateTo=queryDayEnd,
             fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{queryDayStart:%Y-%m-%d}.png')),
             # fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{queryDayStart:%Y-%m-%d}.svg')),
+            majorLocatorAxisX=mdates.HourLocator(interval=3),
             minorLocatorAxisX=mdates.HourLocator(),
             majorFormatterAxisX=mdates.DateFormatter('%H:%M')
         )
@@ -190,6 +191,7 @@ def main():
             plotDateTo=queryDayEnd,
             fileName=(os.path.join(dir, 'Images', 'day', f'gas-plot-{queryDayStart:%Y-%m-%d}.png')),
             # fileName=(os.path.join(dir, 'Images', 'day', f'gas-plot-{queryDayStart:%Y-%m-%d}.svg')),
+            majorLocatorAxisX=mdates.HourLocator(interval=3),
             minorLocatorAxisX=mdates.HourLocator(),
             majorFormatterAxisX=mdates.DateFormatter('%H:%M')
         )

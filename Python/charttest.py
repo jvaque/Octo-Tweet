@@ -1,3 +1,4 @@
+# Syncronize with mysqlRetrieveTest as that graph is currently slightly ahead
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -7,25 +8,27 @@ import json
 
 # Electricity
 data = 'Python/data2electricBoogaloo.csv'
-config_color_line = "#e9f50a"
-config_color_fill = "#eff853"
-chart_ylabel = 'Electricity Consumption (kWh)'
-
+plotColorLine = "#e9f50a"
+plotColorFill = "#eff853"
+chartLabelX = 'Time of day (h)'
+chartLabelY = 'Electricity Consumption (kWh)'
 
 # # Gas
 # data = 'Python/data2gasBoogaloo.csv'
-# config_color_line = "#368ee0"
-# config_color_fill = "#72afe9"
-# chart_ylabel = 'Gas Consumption (kWh)'
+# plotColorLine = "#368ee0"
+# plotColorFill = "#72afe9"
+# chartLabelX = 'Time of day (h)'
+# chartLabelY = 'Gas Consumption (kWh)'
 
-chart_title = '24th Sept 2020'
+chartTitle = '24th Sept 2020'
 
-query_day_from = datetime.date(2020, 9, 24)
-query_day_to = query_day_from + datetime.timedelta(1)
+plotDateFrom = datetime.date(2020, 9, 24)
+plotDateTo = plotDateFrom + datetime.timedelta(1)
 
 variable_date_from = datetime.datetime.fromisoformat("2020-09-24 00:00:00")
 variable_date_to = datetime.datetime.fromisoformat("2020-09-24 23:30:00")
 
+# ------------------------------- Retrieve data -------------------------------
 listOfUse = []
 with open(data) as csv_file:
     csv_reader = csv.reader(csv_file)
@@ -52,31 +55,38 @@ with open(data) as csv_file:
 
         listOfUse.append([int(row[0]), float(row[1]), datetimeFrom, row[3], datetimeTo, row[5]])
 
-energyUseListDisplay = []
-timeListDisplay = []
+# --------------------------------- Plot data----------------------------------
+energyUseListPlot = []
+timeListPlot = []
 
 for element in listOfUse:
-    energyUseListDisplay.append(element[1])
-    timeListDisplay.append(element[2])
-    energyUseListDisplay.append(element[1])
-    timeListDisplay.append(element[4])
+    energyUseListPlot.append(element[1])
+    timeListPlot.append(element[2])
+    energyUseListPlot.append(element[1])
+    timeListPlot.append(element[4])
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(16,9))
 
-ax.plot(timeListDisplay, energyUseListDisplay, color=config_color_line)
-ax.fill_between(timeListDisplay, energyUseListDisplay, color=config_color_fill)
+ax.plot(timeListPlot, energyUseListPlot, color=plotColorLine)
+ax.fill_between(timeListPlot, energyUseListPlot, color=plotColorFill)
 
-ax.set_xlim(query_day_from, query_day_to)
-ax.set_ylim(0, max(energyUseListDisplay)*1.1)
+ax.set_xlim(plotDateFrom, plotDateTo)
+if (len(energyUseListPlot) > 0):
+    ax.set_ylim(0, max(energyUseListPlot)*1.1)
 
-hours = mdates.HourLocator()
-hours_fmt = mdates.DateFormatter('%H:%M')
-ax.xaxis.set_major_formatter(hours_fmt)
-ax.xaxis.set_minor_locator(hours)
+ax.xaxis.set_major_locator(mdates.HourLocator(interval=3))
+ax.xaxis.set_minor_locator(mdates.HourLocator())
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+# ax.xaxis.set_minor_formatter()
 
-ax.set_xlabel('Time of day (h)')
-ax.set_ylabel(chart_ylabel)
-ax.set_title(chart_title)
+ax.tick_params(which='major', width=1.0)
+ax.tick_params(which='major', length=10)
+ax.tick_params(which='minor', width=1.0, labelsize=10)
+ax.tick_params(which='minor', length=5, labelsize=10, labelcolor='0.25')
+
+ax.set_title(chartTitle)
+ax.set_xlabel(chartLabelX)
+ax.set_ylabel(chartLabelY)
 
 # ax.legend()
 
@@ -85,5 +95,5 @@ ax.set_title(chart_title)
 
 # plt.savefig('plot.svg')
 # plt.savefig('plot.png')
-
 plt.show()
+plt.close()
