@@ -18,11 +18,13 @@ def addTablesDirToList():
     tables.extend([
         "Electricity",
         "Gas",
+        "Data_Sources",
         ])
 
     # Tables with Foreign Keys Not Many-to-Many
-    # tables.extend([
-    #     ])
+    tables.extend([
+        "Chart_Tracker",
+        ])
 
     # Tables with Foreign Keys Many-to-Many
     # tables.extend([
