@@ -1,11 +1,14 @@
 #--------------------------------------------------------------------------------------------------
-GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spElectricity_GetLatestSavedRecord` TO 'octo_tweet_sp'@'localhost';
-GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spElectricity_GetRecordsFromRange` TO 'octo_tweet_sp'@'localhost';
-GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spElectricity_Insert` TO 'octo_tweet_sp'@'localhost';
+GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spChartTracker_Insert` TO 'octo_tweet_sp'@'localhost';
+GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spChartTracker_SelectChartsToMake` TO 'octo_tweet_sp'@'localhost';
 #--------------------------------------------------------------------------------------------------
-GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spGas_GetLatestSavedRecord` TO 'octo_tweet_sp'@'localhost';
-GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spGas_GetRecordsFromRange` TO 'octo_tweet_sp'@'localhost';
-GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spGas_Insert` TO 'octo_tweet_sp'@'localhost';
+GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spDataSources_Insert` TO 'octo_tweet_sp'@'localhost';
+GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spDataSources_SelectAll` TO 'octo_tweet_sp'@'localhost';
+GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spDataSources_SelectByName` TO 'octo_tweet_sp'@'localhost';
 #--------------------------------------------------------------------------------------------------
+GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spDataValues_Insert` TO 'octo_tweet_sp'@'localhost';
+GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spDataValues_SelectLatestSavedRecord` TO 'octo_tweet_sp'@'localhost';
+GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spDataValues_SelectRecordsFromRange` TO 'octo_tweet_sp'@'localhost';
 
 FLUSH PRIVILEGES;
+
