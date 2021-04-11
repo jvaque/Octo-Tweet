@@ -41,26 +41,24 @@ namespace Quarterback
                 if (args[0] == "-a" || args[0] == "--all")
                 {
                     // Retrieve and save all the history from Electricity & Gas
-                    // Electricity
-                    List<List<DataValuesModel>> allHistoryElectricityUse = await AllHistory("Electricity");
+                    List<Task<List<List<DataValuesModel>>>> tasksHistory = new List<Task<List<List<DataValuesModel>>>>
+                    {
+                        // Electricity
+                        AllHistory("Electricity"),
+                        // Gas
+                        AllHistory("Gas")
+                    };
+                    List<List<DataValuesModel>>[] results = await Task.WhenAll(tasksHistory);
 
+                    // Save all results to database
                     List<Task> tasks = new List<Task>();
-                    foreach (var item in allHistoryElectricityUse)
+                    foreach (var item in results)
                     {
-                        tasks.Add(_dataValues.SaveListDataValuesAsync(item));
+                        foreach (var listDataValues in item)
+                        {
+                            tasks.Add(_dataValues.SaveListDataValuesAsync(listDataValues));
+                        }
                     }
-
-                    await Task.WhenAll(tasks);
-
-                    // Gas
-                    List<List<DataValuesModel>> allHistoryGasUse = await AllHistory("Gas");
-
-                    tasks = new List<Task>();
-                    foreach (var item in allHistoryGasUse)
-                    {
-                        tasks.Add(_dataValues.SaveListDataValuesAsync(item));
-                    }
-
                     await Task.WhenAll(tasks);
                 }
                 else
