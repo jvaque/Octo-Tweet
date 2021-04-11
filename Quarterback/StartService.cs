@@ -69,30 +69,36 @@ namespace Quarterback
             else
             {
                 // Retrieve and save all the new infromation from Electricity & Gas
-                // Electricity
-                List<DataValuesModel> tempNameElectricityNew = await NewHistory("Electricity");
-
-                if (tempNameElectricityNew.Count > 0)
+                string[] tables = { "Electricity", "Gas" };
+                List<Task<List<DataValuesModel>>> tasksNewHistory = new List<Task<List<DataValuesModel>>>();
+                foreach (var table in tables)
                 {
-                    await _dataValues.SaveListDataValuesAsync(tempNameElectricityNew);
-                    Console.WriteLine($"{tempNameElectricityNew.Count} New electricity records found and saved since last update");
+                    tasksNewHistory.Add(NewHistory(table));
                 }
-                else
-                {
-                    Console.WriteLine("No new electricity records found since last update");
-                }
+                List<DataValuesModel>[] results = await Task.WhenAll(tasksNewHistory);
 
-                // Gas
-                List<DataValuesModel> tempNameGasNew = await NewHistory("Gas");
-
-                if (tempNameGasNew.Count > 0)
+                // Save results to database
+                List<Task> tasks = new List<Task>();
+                foreach (var item in results)
                 {
-                    await _dataValues.SaveListDataValuesAsync(tempNameGasNew);
-                    Console.WriteLine($"{tempNameGasNew.Count} New gas records found and saved since last update");
+                    if (item.Count > 0)
+                    {
+                        tasks.Add(_dataValues.SaveListDataValuesAsync(item));
+                    }
                 }
-                else
+                await Task.WhenAll(tasks);
+
+                // Display messages once everything is saved
+                for (int i = 0; i < results.Length; i++)
                 {
-                    Console.WriteLine("No new gas records found since last update");
+                    if (results[i].Count > 0)
+                    {
+                        Console.WriteLine($"{results[i].Count} New {tables[i]} records found and saved since last update");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No new {tables[i]} records found since last update");
+                    }
                 }
             }
         }
