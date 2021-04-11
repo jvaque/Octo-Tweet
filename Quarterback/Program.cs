@@ -17,8 +17,7 @@ namespace Quarterback
                     services.AddSingleton<IAPIHelper, APIHelper>();
 
                     // Octo-Tweet.Library
-                    services.AddTransient<IOctopusElectricityHelper, OctopusElectricityHelper>();
-                    services.AddTransient<IOctopusGasHelper, OctopusGasHelper>();
+                    services.AddTransient<IOctopusHelper, OctopusHelper>();
 
                     // DatabaseData.Libary
                     services.AddTransient<IMySqlDataAccess, MySqlDataAccess>();

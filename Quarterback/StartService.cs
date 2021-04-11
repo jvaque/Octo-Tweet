@@ -13,22 +13,19 @@ namespace Quarterback
     public class StartService : IStartService
     {
         private readonly IConfiguration _config;
-        private readonly IOctopusElectricityHelper _octopusElectricityHelper;
-        private readonly IOctopusGasHelper _octopusGasHelper;
+        private readonly IOctopusHelper _octopusHelper;
         private readonly IDataSources _dataSources;
         private readonly IDataValues _dataValues;
 
         public StartService(
             IConfiguration config, 
-            IOctopusElectricityHelper octopusElectricityHelper, 
-            IOctopusGasHelper octopusGasHelper,
+            IOctopusHelper octopusHelper,
             IDataSources dataSources,
             IDataValues dataValues
             )
         {
             _config = config;
-            _octopusElectricityHelper = octopusElectricityHelper;
-            _octopusGasHelper = octopusGasHelper;
+            _octopusHelper = octopusHelper;
             _dataSources = dataSources;
             _dataValues = dataValues;
         }
@@ -45,7 +42,7 @@ namespace Quarterback
                 {
                     // Retrieve and save all the history from Electricity & Gas
                     // Electricity
-                    List<List<DataValuesModel>> allHistoryElectricityUse = await AllHistoryElectricity();
+                    List<List<DataValuesModel>> allHistoryElectricityUse = await AllHistory("Electricity");
 
                     List<Task> tasks = new List<Task>();
                     foreach (var item in allHistoryElectricityUse)
@@ -56,7 +53,7 @@ namespace Quarterback
                     await Task.WhenAll(tasks);
 
                     // Gas
-                    List<List<DataValuesModel>> allHistoryGasUse = await AllHistoryGas();
+                    List<List<DataValuesModel>> allHistoryGasUse = await AllHistory("Gas");
 
                     tasks = new List<Task>();
                     foreach (var item in allHistoryGasUse)
@@ -75,7 +72,7 @@ namespace Quarterback
             {
                 // Retrieve and save all the new infromation from Electricity & Gas
                 // Electricity
-                List<DataValuesModel> tempNameElectricityNew = await NewHistoryElectricity();
+                List<DataValuesModel> tempNameElectricityNew = await NewHistory("Electricity");
 
                 if (tempNameElectricityNew.Count > 0)
                 {
@@ -88,7 +85,7 @@ namespace Quarterback
                 }
 
                 // Gas
-                List<DataValuesModel> tempNameGasNew = await NewHistoryGas();
+                List<DataValuesModel> tempNameGasNew = await NewHistory("Gas");
 
                 if (tempNameGasNew.Count > 0)
                 {
@@ -121,15 +118,15 @@ namespace Quarterback
             return output;
         }
 
-        private async Task<List<DataValuesModel>> NewHistoryElectricity()
+        private async Task<List<DataValuesModel>> NewHistory(string energySource)
         {
             // Retrieve config values
-            string electricityMPAN = _config.GetValue<string>("OctopusApi:Electricity:mpan");
-            string electricitySerialNumber = _config.GetValue<string>("OctopusApi:Electricity:serial_number");
+            string energySourceMPAN = _config.GetValue<string>($"OctopusApi:{energySource}:mpan");
+            string energySourceSerialNumber = _config.GetValue<string>($"OctopusApi:{energySource}:serial_number");
 
             // Retrieve latest record from database and the data source id
-            DataValuesModel lastRecordElectricity = await _dataValues.RetrieveLastRecordForSourceAsync("Electricity");
-            DataSourcesModel electricityModel = await _dataSources.GetDataSourceIdFromName("Electricity");
+            DataValuesModel lastRecordEnergySource = await _dataValues.RetrieveLastRecordForSourceAsync(energySource);
+            DataSourcesModel energySourceModel = await _dataSources.GetDataSourceIdFromName(energySource);
 
             // Variables
             List<DataValuesModel> returnList = new List<DataValuesModel>();
@@ -139,7 +136,7 @@ namespace Quarterback
             while (true)
             {
                 // Get a page of values
-                ApiModel temp = await _octopusElectricityHelper.GetConsumptionPage(page, electricityMPAN, electricitySerialNumber);
+                ApiModel temp = await _octopusHelper.GetConsumptionPage(energySource, page, energySourceMPAN, energySourceSerialNumber);
 
                 if (useCount == 0)
                 {
@@ -153,19 +150,19 @@ namespace Quarterback
                 }
 
                 // Parse from ApiModel to List<DataValuesModel>
-                List<DataValuesModel> tempList = MapApiToDatabase(temp, electricityModel);
+                List<DataValuesModel> tempList = MapApiToDatabase(temp, energySourceModel);
 
                 // Look at each record and determine if the last record in the database has been reached
                 foreach (var item in tempList)
                 {
                     // TODO: look at a way to incorporate a way to determine if two instances of a class hold the same values determining them as "equal" 
                     //  even if they are different instances of a class.
-                    bool tempBoolTest = item.Data_source_id == lastRecordElectricity.Data_source_id &
-                                        item.Data_Value == lastRecordElectricity.Data_Value &
-                                        item.Data_interval_start_datetime == lastRecordElectricity.Data_interval_start_datetime &
-                                        item.Data_interval_start_offset == lastRecordElectricity.Data_interval_start_offset &
-                                        item.Data_interval_end_datetime == lastRecordElectricity.Data_interval_end_datetime &
-                                        item.Data_interval_end_offset == lastRecordElectricity.Data_interval_end_offset;
+                    bool tempBoolTest = item.Data_source_id == lastRecordEnergySource.Data_source_id &
+                                        item.Data_Value == lastRecordEnergySource.Data_Value &
+                                        item.Data_interval_start_datetime == lastRecordEnergySource.Data_interval_start_datetime &
+                                        item.Data_interval_start_offset == lastRecordEnergySource.Data_interval_start_offset &
+                                        item.Data_interval_end_datetime == lastRecordEnergySource.Data_interval_end_datetime &
+                                        item.Data_interval_end_offset == lastRecordEnergySource.Data_interval_end_offset;
 
                     // Record match found
                     if (tempBoolTest)
@@ -184,142 +181,38 @@ namespace Quarterback
             }
         }
 
-        private async Task<List<DataValuesModel>> NewHistoryGas()
+        private async Task<List<List<DataValuesModel>>> AllHistory(string energySource)
         {
             // Retrieve config values
-            string gasMPAN = _config.GetValue<string>("OctopusApi:Gas:mpan");
-            string gasSerialNumber = _config.GetValue<string>("OctopusApi:Gas:serial_number");
-
-            // Retrieve latest record from database
-            DataValuesModel lastRecordGas = await _dataValues.RetrieveLastRecordForSourceAsync("Gas");
-            DataSourcesModel gasModel = await _dataSources.GetDataSourceIdFromName("Gas");
-
-            // Variables
-            List<DataValuesModel> returnList = new List<DataValuesModel>();
-            int page = 1;
-            int useCount = 0;
-
-            while (true)
-            {
-                // Get a page of values
-                ApiModel temp = await _octopusGasHelper.GetConsumptionPage(page, gasMPAN, gasSerialNumber);
-
-                if (useCount == 0)
-                {
-                    useCount = temp.Count;
-                }
-                else if (useCount != temp.Count)
-                {
-                    // Throw an error if the ammount of records get changed as the program is making subsequent calls
-                    // Look if there is a more gracefull way of handling this error in the future
-                    throw new Exception();
-                }
-
-                // Parse from ApiGasModel to List<GasModel>
-                List<DataValuesModel> tempList = MapApiToDatabase(temp, gasModel);
-
-                // Look at each record and determine if the last record in the database has been reached
-                foreach (var item in tempList)
-                {
-                    // TODO: look at a way to incorporate a way to determine if two instances of a class hold the same values determining them as "equal" 
-                    //  even if they are different instances of a class.
-                    bool tempBoolTest = item.Data_source_id == lastRecordGas.Data_source_id &
-                                        item.Data_Value == lastRecordGas.Data_Value &
-                                        item.Data_interval_start_datetime == lastRecordGas.Data_interval_start_datetime &
-                                        item.Data_interval_start_offset == lastRecordGas.Data_interval_start_offset &
-                                        item.Data_interval_end_datetime == lastRecordGas.Data_interval_end_datetime &
-                                        item.Data_interval_end_offset == lastRecordGas.Data_interval_end_offset;
-
-                    // Record match found
-                    if (tempBoolTest)
-                    {
-                        return returnList;
-                    }
-                    // Record not found
-                    else
-                    {
-                        returnList.Add(item);
-                    }
-                }
-
-                page++;
-
-            }
-        }
-
-        private async Task<List<List<DataValuesModel>>> AllHistoryElectricity()
-        {
-            // Retrieve config values
-            string electricityMPAN = _config.GetValue<string>("OctopusApi:Electricity:mpan");
-            string electricitySerialNumber = _config.GetValue<string>("OctopusApi:Electricity:serial_number");
+            string energySourceMPAN = _config.GetValue<string>($"OctopusApi:{energySource}:mpan");
+            string energySourceSerialNumber = _config.GetValue<string>($"OctopusApi:{energySource}:serial_number");
 
             // Call api to retrieve count or records to retrieve
-            ApiModel tempUse = await _octopusElectricityHelper.GetConsumption(electricityMPAN, electricitySerialNumber);
-            DataSourcesModel electricityModel = await _dataSources.GetDataSourceIdFromName("Electricity");
+            ApiModel tempUse = await _octopusHelper.GetConsumption(energySource, energySourceMPAN, energySourceSerialNumber);
+            DataSourcesModel energySourceModel = await _dataSources.GetDataSourceIdFromName(energySource);
 
-            double electricityPages = Math.Ceiling(tempUse.Count / 100d);
+            double energySourcePages = Math.Ceiling(tempUse.Count / 100d);
 
-            List<List<DataValuesModel>> electricityHistory = new List<List<DataValuesModel>>();
+            List<List<DataValuesModel>> energySourceHistory = new List<List<DataValuesModel>>();
             List<Task<ApiModel>> tasks = new List<Task<ApiModel>>();
 
-            for (int page = 1; page < (electricityPages + 1); page++)
+            for (int page = 1; page < (energySourcePages + 1); page++)
             {
-                tasks.Add(_octopusElectricityHelper.GetConsumptionPage(page, electricityMPAN, electricitySerialNumber));
+                tasks.Add(_octopusHelper.GetConsumptionPage(energySource, page, energySourceMPAN, energySourceSerialNumber));
             }
 
             var results = await Task.WhenAll(tasks);
             int countOfRetrievedRecords = 0;
             foreach (var item in results)
             {
-                List<DataValuesModel> tempList = MapApiToDatabase(item, electricityModel);
+                List<DataValuesModel> tempList = MapApiToDatabase(item, energySourceModel);
                 countOfRetrievedRecords += tempList.Count;
-                electricityHistory.Add(tempList);
+                energySourceHistory.Add(tempList);
             }
 
             if (tempUse.Count == countOfRetrievedRecords)
             {
-                return electricityHistory;
-            }
-            else
-            {
-                // TODO: Find a more elegant way to handle the error
-                throw new Exception();
-            }
-
-        }
-
-        private async Task<List<List<DataValuesModel>>> AllHistoryGas()
-        {
-            // Retrieve config values
-            string gasMPAN = _config.GetValue<string>("OctopusApi:Gas:mpan");
-            string gasSerialNumber = _config.GetValue<string>("OctopusApi:Gas:serial_number");
-
-            // Call api to retrieve count or records to retrieve
-            ApiModel tempUse = await _octopusGasHelper.GetConsumption(gasMPAN, gasSerialNumber);
-            DataSourcesModel gasModel = await _dataSources.GetDataSourceIdFromName("Gas");
-
-            double gasPages = Math.Ceiling(tempUse.Count / 100d);
-
-            List<List<DataValuesModel>> gasHistory = new List<List<DataValuesModel>>();
-            List<Task<ApiModel>> task = new List<Task<ApiModel>>();
-
-            for (int page = 1; page < (gasPages + 1); page++)
-            {
-                task.Add(_octopusGasHelper.GetConsumptionPage(page, gasMPAN, gasSerialNumber));
-            }
-
-            var results = await Task.WhenAll(task);
-            int countOfRetrievedRecords = 0;
-            foreach (var item in results)
-            {
-                List<DataValuesModel> tempList = MapApiToDatabase(item, gasModel);
-                countOfRetrievedRecords += tempList.Count;
-                gasHistory.Add(tempList);
-            }
-
-            if (tempUse.Count == countOfRetrievedRecords)
-            {
-                return gasHistory;
+                return energySourceHistory;
             }
             else
             {
