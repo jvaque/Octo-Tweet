@@ -41,10 +41,10 @@ def customStepChart(listOfUse, chartTitle, chartLabelX, chartLabelY,
     timeListPlot = []
 
     for element in listOfUse:
-        energyUseListPlot.append(element[1])
-        timeListPlot.append(element[2])
-        energyUseListPlot.append(element[1])
-        timeListPlot.append(element[4])
+        energyUseListPlot.append(element[2])
+        timeListPlot.append(element[3])
+        energyUseListPlot.append(element[2])
+        timeListPlot.append(element[5])
 
     fig, ax = plt.subplots(figsize=(16,9))
 
@@ -52,8 +52,10 @@ def customStepChart(listOfUse, chartTitle, chartLabelX, chartLabelY,
     ax.fill_between(timeListPlot, energyUseListPlot, color=plotColorFill)
 
     ax.set_xlim(plotDateFrom, plotDateTo)
-    if (len(energyUseListPlot) > 0):
+    if (len(energyUseListPlot) > 0 and max(energyUseListPlot) > 0):
         ax.set_ylim(0, max(energyUseListPlot)*1.1)
+    else:
+        ax.set_ylim(0, 0.25)
 
     if (majorLocatorAxisX != None):
         ax.xaxis.set_major_locator(majorLocatorAxisX)
@@ -153,8 +155,8 @@ def main():
         # Electricity chart for the day
         listOfUse = []
         
-        args = [queryDayStart, queryDayEnd]
-        listOfUse = dataAccess.callStoredProcedure('spElectricity_GetRecordsFromRange', args, 'MySql')
+        args = ['Electricity', queryDayStart, queryDayEnd]
+        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
 
         # Create and save a copy of the daily chart
         customStepChart(
@@ -176,8 +178,8 @@ def main():
         # Gas chart for the day
         listOfUse = []
         
-        args = [queryDayStart, queryDayEnd]
-        listOfUse = dataAccess.callStoredProcedure('spGas_GetRecordsFromRange', args, 'MySql')
+        args = ['Gas', queryDayStart, queryDayEnd]
+        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
 
         # Create and save a copy of the daily chart
         customStepChart(
@@ -213,8 +215,8 @@ def main():
         # Electricity chart for the week
         listOfUse = []
         
-        args = [queryWeekStart, queryWeekEnd]
-        listOfUse = dataAccess.callStoredProcedure('spElectricity_GetRecordsFromRange', args, 'MySql')
+        args = ['Electricity', queryWeekStart, queryWeekEnd]
+        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
 
         # Create and save a copy of the daily chart
         customStepChart(
@@ -237,8 +239,8 @@ def main():
         # Gas chart for the week
         listOfUse = []
         
-        args = [queryWeekStart, queryWeekEnd]
-        listOfUse = dataAccess.callStoredProcedure('spGas_GetRecordsFromRange', args, 'MySql')
+        args = ['Gas', queryWeekStart, queryWeekEnd]
+        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
 
         # Create and save a copy of the daily chart
         customStepChart(
@@ -277,8 +279,8 @@ def main():
         # Electricity chart for the month
         listOfUse = []
         
-        args = [queryMonthStart, queryMonthEnd]
-        listOfUse = dataAccess.callStoredProcedure('spElectricity_GetRecordsFromRange', args, 'MySql')
+        args = ['Electricity', queryMonthStart, queryMonthEnd]
+        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
 
         # Create and save a copy of the daily chart
         customStepChart(
@@ -301,8 +303,8 @@ def main():
         # Gas chart for the month
         listOfUse = []
         
-        args = [queryMonthStart, queryMonthEnd]
-        listOfUse = dataAccess.callStoredProcedure('spGas_GetRecordsFromRange', args, 'MySql')
+        args = ['Gas', queryMonthStart, queryMonthEnd]
+        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
 
         # Create and save a copy of the daily chart
         customStepChart(
