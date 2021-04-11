@@ -9,7 +9,7 @@ BEGIN
 
     SELECT
         `data_source_id`,
-        `data_source_name`
+        `Data_Sources`.`data_source_name`
     FROM
         `Data_Sources`
     WHERE

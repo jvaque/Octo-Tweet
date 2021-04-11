@@ -3,14 +3,14 @@ DROP PROCEDURE IF EXISTS `octo_tweet`.`spChartTracker_SelectChartsToMake`;
 DELIMITER //
 
 CREATE PROCEDURE `octo_tweet`.`spChartTracker_SelectChartsToMake`(
-    IN Data_source_id varchar(255),
+    IN Data_source_name varchar(255),
     IN Data_source_last_record datetime
 )
 BEGIN
 
     SELECT
         `chart_tracker_id`,
-        `data_source_id`,
+        `Chart_Tracker`.`data_source_id`,
         `chart_type`,
         `chart_last_from`,
         `chart_last_to`,
@@ -18,8 +18,10 @@ BEGIN
         `chart_next_to`
     FROM
         `Chart_Tracker`
+    LEFT JOIN `Data_Sources` ON
+        (`Chart_Tracker`.`data_source_id` = `Data_Sources`.`data_source_id`)
     WHERE
-        (`data_source_id` = Data_source_id)
+        (`Data_Sources`.`data_source_name` = Data_source_name)
         AND
         (`chart_next_to` <= Data_source_last_record)
     ORDER BY
