@@ -24,8 +24,8 @@ namespace Quarterback
                     services.AddTransient<IMySqlDataAccess, MySqlDataAccess>();
 
                     // Octo-Tweet.Data.Library
-                    services.AddTransient<IElectricity, Electricity>();
-                    services.AddTransient<IGas, Gas>();
+                    services.AddTransient<IDataSources, DataSources>();
+                    services.AddTransient<IDataValues, DataValues>();
 
                     services.AddTransient<IStartService, StartService>();
                 })

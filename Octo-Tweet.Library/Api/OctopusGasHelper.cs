@@ -14,13 +14,13 @@ namespace Octo_Tweet.Library.Api
             _apiHelper = apiHelper;
         }
 
-        public async Task<ApiGasModel> GetConsumption(string mpan, string serialNumber)
+        public async Task<ApiModel> GetConsumption(string mpan, string serialNumber)
         {
             using (HttpResponseMessage response = await _apiHelper.ApiClient.GetAsync($"/v1/gas-meter-points/{ mpan }/meters/{ serialNumber }/consumption/"))
             {
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadAsAsync<ApiGasModel>();
+                    var result = await response.Content.ReadAsAsync<ApiModel>();
                     return result;
                 }
                 else
@@ -29,13 +29,13 @@ namespace Octo_Tweet.Library.Api
                 }
             }
         }
-        public async Task<ApiGasModel> GetConsumptionPage(double page, string mpan, string serialNumber)
+        public async Task<ApiModel> GetConsumptionPage(double page, string mpan, string serialNumber)
         {
             using (HttpResponseMessage response = await _apiHelper.ApiClient.GetAsync($"/v1/gas-meter-points/{ mpan }/meters/{ serialNumber }/consumption/?page={ page }"))
             {
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadAsAsync<ApiGasModel>();
+                    var result = await response.Content.ReadAsAsync<ApiModel>();
                     return result;
                 }
                 else
