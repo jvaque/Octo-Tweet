@@ -34,8 +34,7 @@ END
 
 DELIMITER ;
 
--- Consider this future improvement, remove the Electricity and Gas tables and 
---  create a new table called Data_Values with similar structure but with an 
---  extra column for the data_source_id, this way this stored procedure could
---  be changed to take only the chart type and return the charts that it can
---  make
+-- This stored procedure is to be changed to only take the chart type it's to
+--  make and it will return the charts it can make, a even more advanced 
+--  version of this program would just return all the charts it can make, 
+--  checking on it's own for the last inserted record for each data_type
