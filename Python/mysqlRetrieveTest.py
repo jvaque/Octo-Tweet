@@ -89,7 +89,7 @@ def customChart(valuesX, valuesY, chartTitle, chartLabelX, chartLabelY,
     # ax.grid(axis='y', color='#f5f4d7', linestyle='--')
 
     plt.savefig(fileName)
-    plt.show()
+    # plt.show()
     plt.close()
 
 # ------------------------------------------------------------------------------
@@ -133,22 +133,8 @@ def makeImagesFoldersIfMissing(baseDir):
         path = os.path.join(baseDir, 'Images', folder)
         if(not os.path.exists(path)):
             os.makedirs(path)
-# ------------------------------------------------------------------------------
 
-def main():
-    # Get path to the python script being run
-    dir = os.path.abspath(os.path.dirname(__file__))
-
-    # Retrieve values from config file
-    with open(os.path.join(dir, 'appsettings.json'), 'r') as f:
-        config = json.load(f)
-    # This used to be a global variable and now the function doesn't have access
-    #  to it, maybe making it into a class might solve it
-
-    makeImagesFoldersIfMissing(dir)
-
-    dataAccess = MySqlDataAccess(config)
-
+def dailyCharts(dataAccess, config, dir):
     # Generate daily charts
     days = 200
     # days = 0 # To easily skip when debugging
@@ -213,6 +199,7 @@ def main():
         queryDayStart = queryDayStart + datetime.timedelta(days=1)
         queryDayEnd = queryDayStart + datetime.timedelta(days=1)
 
+def weeklyCharts(dataAccess, config, dir):
     # Generate weekly charts
     weeks = 30
     # weeks = 0 # To easily skip when debugging
@@ -231,7 +218,7 @@ def main():
         listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
         xList, yList = squareData(listOfUse)
 
-        # Create and save a copy of the daily chart
+        # Create and save a copy of the weekly chart
         customChart(
             valuesX=xList,
             valuesY=yList,
@@ -257,7 +244,7 @@ def main():
         listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
         xList, yList = squareData(listOfUse)
 
-        # Create and save a copy of the daily chart
+        # Create and save a copy of the weekly chart
         customChart(
             valuesX=xList,
             valuesY=yList,
@@ -280,6 +267,7 @@ def main():
         queryWeekEnd = queryWeekStart + datetime.timedelta(weeks=1)
         titleDayWeekEnd = queryWeekStart + datetime.timedelta(days=6)
 
+def montlyCharts(dataAccess, config, dir):
     # Generate monthly charts
     months = 12
     # months = 0 # To easily skip when debugging
@@ -299,7 +287,7 @@ def main():
         listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
         xList, yList = squareData(listOfUse)
 
-        # Create and save a copy of the daily chart
+        # Create and save a copy of the montly chart
         customChart(
             valuesX=xList,
             valuesY=yList,
@@ -325,7 +313,7 @@ def main():
         listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
         xList, yList = squareData(listOfUse)
 
-        # Create and save a copy of the daily chart
+        # Create and save a copy of the montly chart
         customChart(
             valuesX=xList,
             valuesY=yList,
@@ -350,8 +338,27 @@ def main():
             currentMonth = 0
             currentYear +=1
         queryMonthEnd = datetime.date(currentYear, currentMonth+1, 1)
+# ------------------------------------------------------------------------------
 
+def main():
+    # Get path to the python script being run
+    dir = os.path.abspath(os.path.dirname(__file__))
 
+    # Retrieve values from config file
+    with open(os.path.join(dir, 'appsettings.json'), 'r') as f:
+        config = json.load(f)
+    # This used to be a global variable and now the function doesn't have access
+    #  to it, maybe making it into a class might solve it
+
+    makeImagesFoldersIfMissing(dir)
+    # Maybe only run this if a specific flag is passed in so that it isn't 
+    #  constantly checking every time the script is run
+
+    dataAccess = MySqlDataAccess(config)
+
+    dailyCharts(dataAccess, config, dir)
+    weeklyCharts(dataAccess, config, dir)
+    montlyCharts(dataAccess, config, dir)
 
 if __name__ == "__main__":
     main()
