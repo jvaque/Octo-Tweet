@@ -13,12 +13,29 @@ import matplotlib.dates as mdates
 import json
 
 # ------------------------------------------------------------------------------
-def customStepChart(listOfUse, chartTitle, chartLabelX, chartLabelY,
+def squareData(listOfUse):
+    '''
+    Take in a list of consumption values and return two lists for\n
+    the x and y values so that when charted it appears as steps
+    '''
+    returnValuesX = []
+    returnValuesY = []
+
+    for element in listOfUse:
+        returnValuesX.append(element[3])
+        returnValuesY.append(element[2])
+        returnValuesX.append(element[5])
+        returnValuesY.append(element[2])
+
+    return returnValuesX, returnValuesY
+
+def customChart(valuesX, valuesY, chartTitle, chartLabelX, chartLabelY,
                     plotColorLine, plotColorFill, plotDateFrom, plotDateTo, fileName,
                     majorLocatorAxisX=None, minorLocatorAxisX=None,
                     majorFormatterAxisX=None, minorFormatterAxisX=None):
     '''
-    listOfUse: List of consumptions ordered by date as received from the database\n
+    valuesX: List of time period for consumption values\n
+    valuesY: List of consumption values\n
     chartTitle: Title for the chart\n
     chartLabelX: Label for the x axis label\n
     chartLabelY: Lable for the y axis label\n
@@ -37,23 +54,14 @@ def customStepChart(listOfUse, chartTitle, chartLabelX, chartLabelY,
     the x asis for the minor locators
     '''
 
-    energyUseListPlot = []
-    timeListPlot = []
-
-    for element in listOfUse:
-        energyUseListPlot.append(element[2])
-        timeListPlot.append(element[3])
-        energyUseListPlot.append(element[2])
-        timeListPlot.append(element[5])
-
     fig, ax = plt.subplots(figsize=(16,9))
 
-    ax.plot(timeListPlot, energyUseListPlot, color=plotColorLine)
-    ax.fill_between(timeListPlot, energyUseListPlot, color=plotColorFill)
+    ax.plot(valuesX, valuesY, color=plotColorLine)
+    ax.fill_between(valuesX, valuesY, color=plotColorFill)
 
     ax.set_xlim(plotDateFrom, plotDateTo)
-    if (len(energyUseListPlot) > 0 and max(energyUseListPlot) > 0):
-        ax.set_ylim(0, max(energyUseListPlot)*1.1)
+    if (len(valuesY) > 0 and max(valuesY) > 0):
+        ax.set_ylim(0, max(valuesY)*1.1)
     else:
         ax.set_ylim(0, 0.25)
 
@@ -81,7 +89,7 @@ def customStepChart(listOfUse, chartTitle, chartLabelX, chartLabelY,
     # ax.grid(axis='y', color='#f5f4d7', linestyle='--')
 
     plt.savefig(fileName)
-    # plt.show()
+    plt.show()
     plt.close()
 
 # ------------------------------------------------------------------------------
@@ -157,10 +165,12 @@ def main():
         
         args = ['Electricity', queryDayStart, queryDayEnd]
         listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+        xList, yList = squareData(listOfUse)
 
         # Create and save a copy of the daily chart
-        customStepChart(
-            listOfUse=listOfUse,
+        customChart(
+            valuesX=xList,
+            valuesY=yList,
             chartTitle=(f"{queryDayStart:%d %b %Y}"),
             chartLabelX='Time of day (h)',
             chartLabelY='Electricity Consumption (kWh)',
@@ -180,10 +190,12 @@ def main():
         
         args = ['Gas', queryDayStart, queryDayEnd]
         listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+        xList, yList = squareData(listOfUse)
 
         # Create and save a copy of the daily chart
-        customStepChart(
-            listOfUse=listOfUse,
+        customChart(
+            valuesX=xList,
+            valuesY=yList,
             chartTitle=(f"{queryDayStart:%d %b %Y}"),
             chartLabelX='Time of day (h)',
             chartLabelY='Gas Consumption (kWh)',
@@ -217,10 +229,12 @@ def main():
         
         args = ['Electricity', queryWeekStart, queryWeekEnd]
         listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+        xList, yList = squareData(listOfUse)
 
         # Create and save a copy of the daily chart
-        customStepChart(
-            listOfUse=listOfUse,
+        customChart(
+            valuesX=xList,
+            valuesY=yList,
             chartTitle=(f"{queryWeekStart:%d %b %Y}-{titleDayWeekEnd:%d %b %Y}"),
             chartLabelX='Day (h)',
             chartLabelY='Electricity Consumption (kWh)',
@@ -241,10 +255,12 @@ def main():
         
         args = ['Gas', queryWeekStart, queryWeekEnd]
         listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+        xList, yList = squareData(listOfUse)
 
         # Create and save a copy of the daily chart
-        customStepChart(
-            listOfUse=listOfUse,
+        customChart(
+            valuesX=xList,
+            valuesY=yList,
             chartTitle=(f"{queryWeekStart:%d %b %Y}-{titleDayWeekEnd:%d %b %Y}"),
             chartLabelX='Day (h)',
             chartLabelY='Gas Consumption (kWh)',
@@ -281,10 +297,12 @@ def main():
         
         args = ['Electricity', queryMonthStart, queryMonthEnd]
         listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+        xList, yList = squareData(listOfUse)
 
         # Create and save a copy of the daily chart
-        customStepChart(
-            listOfUse=listOfUse,
+        customChart(
+            valuesX=xList,
+            valuesY=yList,
             chartTitle=(f"{queryMonthStart:%b %Y}"),
             chartLabelX='Month',
             chartLabelY='Electricity Consumption (kWh)',
@@ -305,10 +323,12 @@ def main():
         
         args = ['Gas', queryMonthStart, queryMonthEnd]
         listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+        xList, yList = squareData(listOfUse)
 
         # Create and save a copy of the daily chart
-        customStepChart(
-            listOfUse=listOfUse,
+        customChart(
+            valuesX=xList,
+            valuesY=yList,
             chartTitle=(f"{queryMonthStart:%b %Y}"),
             chartLabelX='Month',
             chartLabelY='Gas Consumption (kWh)',
