@@ -125,7 +125,31 @@ class MySqlDataAccess:
             cnx.close()
         
         return listOfResults
+    
+    def saveData(self, storedProcedureName, args, connectionStringName):
+        try:
+            cnx = mysql.connector.connect(
+                user=self._config[connectionStringName]['user_name'],
+                password=self._config[connectionStringName]['password'],
+                host=self._config[connectionStringName]['host'],
+                database=self._config[connectionStringName]['database_name'])
+            
+            cursor = cnx.cursor()
 
+            cursor.callproc(storedProcedureName, args)
+            cnx.commit()
+
+        except mysql.connector.Error as err:
+            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                print("Something is wrong with your user name or password")
+            elif err.errno == errorcode.ER_BAD_DB_ERROR:
+                print("Database does not exist")
+            else:
+                print(err)
+
+        finally:
+            cursor.close()
+            cnx.close()
 
 def makeImagesFoldersIfMissing(baseDir):
     listOfDirs = ['day', 'week', 'month', 'quarter', 'year']
@@ -133,6 +157,69 @@ def makeImagesFoldersIfMissing(baseDir):
         path = os.path.join(baseDir, 'Images', folder)
         if(not os.path.exists(path)):
             os.makedirs(path)
+
+# Function to return what charts to make
+# Then look through results and check which ones to make
+# Foreach:
+    # Retrieve data neccesary for chart
+    # Generate chart
+    # (Tweet)
+    # Update database record of charts to make
+
+def unamedFunctionForNow(dataAccess, config, dir, chartType):
+    # For now have to do this 
+    # args = [chartType]
+    # dataSourceRecord = dataAccess.callStoredProcedure('spDataSources_SelectByName', args, 'MySql')
+
+    args = [chartType]
+    lastRecord = dataAccess.callStoredProcedure('spDataValues_SelectLatestSavedRecord', args, 'MySql')[0]
+
+    args = [chartType, lastRecord[5]]
+    chartsToMake = dataAccess.callStoredProcedure('spChartTracker_SelectChartsToMake', args, 'MySql')
+
+    # End of temp to debug
+
+    for chart in chartsToMake:
+        if(chart[2] == 'Daily'):
+            # Here we got the last chart made with chart_last_from and chart_last_to
+            datetimeFrom = chart[5]
+            datetimeTo = chart[6]
+            while (datetimeTo < lastRecord[5]):
+                args = ['Electricity', datetimeFrom, datetimeTo]
+                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+                xList, yList = squareData(listOfUse)
+
+                # Create and save a copy of the daily chart
+                customChart(
+                    valuesX=xList,
+                    valuesY=yList,
+                    chartTitle=(f"{datetimeFrom:%d %b %Y}"),
+                    chartLabelX='Time of day (h)',
+                    chartLabelY='Electricity Consumption (kWh)',
+                    plotColorLine=config['Charts']['electricity_color_line'],
+                    plotColorFill=config['Charts']['electricity_color_fill'],
+                    plotDateFrom=datetimeFrom,
+                    plotDateTo=datetimeTo,
+                    fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{datetimeFrom:%Y-%m-%d}.png')),
+                    # fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{datetimeFrom:%Y-%m-%d}.svg')),
+                    majorLocatorAxisX=mdates.HourLocator(interval=3),
+                    minorLocatorAxisX=mdates.HourLocator(),
+                    majorFormatterAxisX=mdates.DateFormatter('%H:%M')
+                )
+
+                datetimeFrom = datetimeFrom + datetime.timedelta(days=1)
+                datetimeTo = datetimeFrom + datetime.timedelta(days=1)
+            
+            datetimeFrom -= datetime.timedelta(days=1)
+            datetimeTo -= datetime.timedelta(days=1)
+
+            datetimeFromNext = datetimeTo
+            datetimeToNext = datetimeTo + datetime.timedelta(days=1)
+
+            args = [chart[0], datetimeFrom, datetimeTo, datetimeFromNext, datetimeToNext]
+            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
+    
+    print('Finished!')
 
 def dailyCharts(dataAccess, config, dir):
     # Generate daily charts
@@ -356,9 +443,11 @@ def main():
 
     dataAccess = MySqlDataAccess(config)
 
-    dailyCharts(dataAccess, config, dir)
-    weeklyCharts(dataAccess, config, dir)
-    montlyCharts(dataAccess, config, dir)
+    unamedFunctionForNow(dataAccess, config, dir, 'Electricity')
+
+    # dailyCharts(dataAccess, config, dir)
+    # weeklyCharts(dataAccess, config, dir)
+    # montlyCharts(dataAccess, config, dir)
 
 if __name__ == "__main__":
     main()

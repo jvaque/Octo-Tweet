@@ -8,8 +8,9 @@ CREATE PROCEDURE `octo_tweet`.`spDataValues_SelectLatestSavedRecord`(
 BEGIN
 
     SELECT
-        `data_value`,
+        `data_value_id`,
         `Data_Values`.`data_source_id`,
+        `data_value`,
         `data_interval_start_datetime`,
         `data_interval_start_offset`,
         `data_interval_end_datetime`,
