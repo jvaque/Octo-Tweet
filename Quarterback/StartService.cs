@@ -118,6 +118,7 @@ namespace Quarterback
             DataSourcesModel energySourceModel = await _dataSources.GetDataSourceIdFromName(chartsTarget);
 
             List<ChartTrackerModel> chartsToMake = new List<ChartTrackerModel>();
+
             // Add daily chart
             chartsToMake.Add(new ChartTrackerModel
             {
@@ -128,6 +129,7 @@ namespace Quarterback
                 Chart_next_from = firstRecordEnergySource.Data_interval_start_datetime.Date,
                 Chart_next_to = firstRecordEnergySource.Data_interval_start_datetime.Date + TimeSpan.FromDays(1)
             });
+
             // Add weekly chart
             DateTime firstMonday = firstRecordEnergySource.Data_interval_start_datetime.Date;
             while (firstMonday.DayOfWeek != DayOfWeek.Monday)
@@ -143,7 +145,19 @@ namespace Quarterback
                 Chart_next_from = firstMonday,
                 Chart_next_to = firstMonday + TimeSpan.FromDays(7)
             });
+
             // Add monthly chart
+            DateTime fistMonth = firstRecordEnergySource.Data_interval_start_datetime.Date;
+            fistMonth -= TimeSpan.FromDays(fistMonth.Day - 1);
+            chartsToMake.Add(new ChartTrackerModel
+            {
+                Data_source_id = energySourceModel.Data_source_id,
+                Chart_type = "Monthly",
+                Chart_last_from = fistMonth.AddMonths(-1),
+                Chart_last_to = fistMonth,
+                Chart_next_from = fistMonth,
+                Chart_next_to = fistMonth.AddMonths(1)
+            });
             // Add quaterly chart
             // Add yearly chart
             // Add rolling yearly chart
