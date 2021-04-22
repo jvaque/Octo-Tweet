@@ -1,7 +1,13 @@
 {
   "profiles": {
     "Quarterback": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "--chart-tracker-fill"
+    },
+    "WSL 2": {
+      "commandName": "Project",
+      "commandLineArgs": "--all",
+      "distributionName": ""
     }
   }
 }

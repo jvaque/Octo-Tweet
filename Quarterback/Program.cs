@@ -23,6 +23,7 @@ namespace Quarterback
                     services.AddTransient<IMySqlDataAccess, MySqlDataAccess>();
 
                     // Octo-Tweet.Data.Library
+                    services.AddTransient<IChartTracker, ChartTracker>();
                     services.AddTransient<IDataSources, DataSources>();
                     services.AddTransient<IDataValues, DataValues>();
 

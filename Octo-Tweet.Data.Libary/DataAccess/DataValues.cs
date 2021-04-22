@@ -26,5 +26,10 @@ namespace Octo_Tweet.Data.Libary.DataAccess
         {
             return (await _mySql.LoadDataAsync<DataValuesModel, dynamic>("spDataValues_SelectLatestSavedRecord", new { Source_name = sourceName }, "octopus_database")).FirstOrDefault();
         }
+
+        public async Task<DataValuesModel> RetrieveFirstRecordForSourceAsync(string sourceName)
+        {
+            return (await _mySql.LoadDataAsync<DataValuesModel, dynamic>("spDataValues_SelectFirstSavedRecord", new { Source_name = sourceName }, "octopus_database")).FirstOrDefault();
+        }
     }
 }

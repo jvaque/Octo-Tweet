@@ -14,18 +14,21 @@ namespace Quarterback
     {
         private readonly IConfiguration _config;
         private readonly IOctopusHelper _octopusHelper;
+        private readonly IChartTracker _chartTracker;
         private readonly IDataSources _dataSources;
         private readonly IDataValues _dataValues;
 
         public StartService(
             IConfiguration config, 
             IOctopusHelper octopusHelper,
+            IChartTracker chartTracker,
             IDataSources dataSources,
             IDataValues dataValues
             )
         {
             _config = config;
             _octopusHelper = octopusHelper;
+            _chartTracker = chartTracker;
             _dataSources = dataSources;
             _dataValues = dataValues;
         }
@@ -60,6 +63,11 @@ namespace Quarterback
                         }
                     }
                     await Task.WhenAll(tasks);
+                }
+                else if (args[0] == "-c" || args[0] == "--chart-tracker-fill")
+                {
+                    await InitialChartTrackerFill("Electricity");
+                    await InitialChartTrackerFill("Gas");
                 }
                 else
                 {
@@ -101,6 +109,46 @@ namespace Quarterback
                     }
                 }
             }
+        }
+
+        private async Task InitialChartTrackerFill(string chartsTarget)
+        {
+            // Get first record
+            DataValuesModel firstRecordEnergySource = await _dataValues.RetrieveFirstRecordForSourceAsync(chartsTarget);
+            DataSourcesModel energySourceModel = await _dataSources.GetDataSourceIdFromName(chartsTarget);
+
+            List<ChartTrackerModel> chartsToMake = new List<ChartTrackerModel>();
+            // Add daily chart
+            chartsToMake.Add(new ChartTrackerModel
+            {
+                Data_source_id = energySourceModel.Data_source_id,
+                Chart_type = "Daily",
+                Chart_last_from = firstRecordEnergySource.Data_interval_start_datetime.Date - TimeSpan.FromDays(1),
+                Chart_last_to = firstRecordEnergySource.Data_interval_start_datetime.Date,
+                Chart_next_from = firstRecordEnergySource.Data_interval_start_datetime.Date,
+                Chart_next_to = firstRecordEnergySource.Data_interval_start_datetime.Date + TimeSpan.FromDays(1)
+            });
+            // Add weekly chart
+            DateTime firstMonday = firstRecordEnergySource.Data_interval_start_datetime.Date;
+            while (firstMonday.DayOfWeek != DayOfWeek.Monday)
+            {
+                firstMonday -= TimeSpan.FromDays(1);
+            }
+            chartsToMake.Add(new ChartTrackerModel
+            {
+                Data_source_id = energySourceModel.Data_source_id,
+                Chart_type = "Weekly",
+                Chart_last_from = firstMonday - TimeSpan.FromDays(7),
+                Chart_last_to = firstMonday,
+                Chart_next_from = firstMonday,
+                Chart_next_to = firstMonday + TimeSpan.FromDays(7)
+            });
+            // Add monthly chart
+            // Add quaterly chart
+            // Add yearly chart
+            // Add rolling yearly chart
+            // Save charts to make
+            await _chartTracker.SaveChartsToTrackerAsync(chartsToMake);
         }
 
         private List<DataValuesModel> MapApiToDatabase(ApiModel apiModel, DataSourcesModel dataSource)
