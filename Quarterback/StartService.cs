@@ -147,19 +147,45 @@ namespace Quarterback
             });
 
             // Add monthly chart
-            DateTime fistMonth = firstRecordEnergySource.Data_interval_start_datetime.Date;
-            fistMonth -= TimeSpan.FromDays(fistMonth.Day - 1);
+            DateTime firstMonth = firstRecordEnergySource.Data_interval_start_datetime.Date;
+            firstMonth -= TimeSpan.FromDays(firstMonth.Day - 1);
             chartsToMake.Add(new ChartTrackerModel
             {
                 Data_source_id = energySourceModel.Data_source_id,
                 Chart_type = "Monthly",
-                Chart_last_from = fistMonth.AddMonths(-1),
-                Chart_last_to = fistMonth,
-                Chart_next_from = fistMonth,
-                Chart_next_to = fistMonth.AddMonths(1)
+                Chart_last_from = firstMonth.AddMonths(-1),
+                Chart_last_to = firstMonth,
+                Chart_next_from = firstMonth,
+                Chart_next_to = firstMonth.AddMonths(1)
             });
             // Add quaterly chart
+
+            DateTime quarterStart = firstMonth;
+            while (quarterStart.Month != 1 && quarterStart.Month != 3 && quarterStart.Month != 6 && quarterStart.Month != 9)
+            {
+                quarterStart = quarterStart.AddMonths(-1);
+            }
+            chartsToMake.Add(new ChartTrackerModel
+            {
+                Data_source_id = energySourceModel.Data_source_id,
+                Chart_type = "Quarterly",
+                Chart_last_from = quarterStart.AddMonths(-3) - TimeSpan.FromDays(7),
+                Chart_last_to = quarterStart + TimeSpan.FromDays(7),
+                Chart_next_from = quarterStart - TimeSpan.FromDays(7),
+                Chart_next_to = quarterStart.AddMonths(3) + TimeSpan.FromDays(7)
+            });
             // Add yearly chart
+
+            DateTime yearStart = quarterStart.AddMonths(1 - quarterStart.Month);
+            chartsToMake.Add(new ChartTrackerModel
+            {
+                Data_source_id = energySourceModel.Data_source_id,
+                Chart_type = "Yearly",
+                Chart_last_from = yearStart.AddMonths(-12) - TimeSpan.FromDays(14),
+                Chart_last_to = yearStart + TimeSpan.FromDays(14),
+                Chart_next_from = yearStart - TimeSpan.FromDays(14),
+                Chart_next_to = yearStart.AddMonths(12) + TimeSpan.FromDays(14)
+            });
             // Add rolling yearly chart
             // Save charts to make
             await _chartTracker.SaveChartsToTrackerAsync(chartsToMake);
