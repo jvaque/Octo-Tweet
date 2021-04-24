@@ -264,6 +264,58 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
 
             args = [chart[0], datetimeWeekFrom, datetimeWeekTo, datetimeWeekFromNext, datetimeWeekToNext]
             dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
+
+        elif (chart[2] == 'Monthly'):
+            datetimeMonthFrom = chart[5]
+            datetimeMonthTo = chart[6]
+            year = datetimeMonthFrom.year
+            month = datetimeMonthFrom.month
+
+            datetimePreviousFrom = datetimeMonthFrom
+
+            while (datetimeMonthTo < lastRecord[5]):
+                args = [chartType, datetimeMonthFrom, datetimeMonthTo]
+                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+                xList, yList = squareData(listOfUse)
+
+                # Create and save a copy of the montly chart
+                customChart(
+                    valuesX=xList,
+                    valuesY=yList,
+                    chartTitle=(f"{datetimeMonthFrom:%b %Y}"),
+                    chartLabelX='Month',
+                    chartLabelY=f'{chartType} Consumption (kWh)',
+                    plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
+                    plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
+                    plotDateFrom=datetimeMonthFrom,
+                    plotDateTo=datetimeMonthTo,
+                    fileName=(os.path.join(dir, 'Images', 'month', f'{chartType.lower()}-plot-{datetimeMonthFrom:%Y-%m}.png')),
+                    # fileName=(os.path.join(dir, 'Images', 'month', f'{chartType.lower()}-plot-{datetimeMonthFrom:%Y-%m}.svg')),
+                    majorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
+                    minorLocatorAxisX=mdates.DayLocator(),
+                    majorFormatterAxisX=mdates.DateFormatter('%d'),
+                    minorFormatterAxisX=mdates.DateFormatter('%d')
+                )
+
+                datetimePreviousFrom = datetimeMonthFrom
+
+                month +=1
+                datetimeMonthFrom = datetime.datetime(year, month, 1)
+                if (month >= 12):
+                    month = 0
+                    year +=1
+                datetimeMonthTo = datetime.datetime(year, month+1, 1)
+
+            datetimeMonthFromNext = datetimeMonthFrom
+            datetimeMonthToNext = datetimeMonthTo
+
+            # Decrease as after generating the last chart the datetime values 
+            # would be for the next chart and not the generated ones
+            datetimeMonthFrom = datetimePreviousFrom
+            datetimeMonthTo = datetimeMonthFromNext
+
+            args = [chart[0], datetimeMonthFrom, datetimeMonthTo, datetimeMonthFromNext, datetimeMonthToNext]
+            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
     
     print('Finished!')
 
@@ -274,76 +326,7 @@ def weeklyCharts(dataAccess, config, dir):
     pass
 
 def montlyCharts(dataAccess, config, dir):
-    # Generate monthly charts
-    months = 12
-    # months = 0 # To easily skip when debugging
-    currentYear = 2020
-    currentMonth = 9
-    queryMonthStart = datetime.date(currentYear, currentMonth, 1)
-    queryMonthEnd = datetime.date(currentYear, currentMonth+1, 1)
-    # queryMonthStart = datetime.date(2020, 10, 1)
-    # queryMonthStart = datetime.date(2021, 3, 1)
-
-    print('Generating batch of monthly charts')
-    for month in tqdm(range(months)):
-        # Electricity chart for the month
-        listOfUse = []
-        
-        args = ['Electricity', queryMonthStart, queryMonthEnd]
-        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
-        xList, yList = squareData(listOfUse)
-
-        # Create and save a copy of the montly chart
-        customChart(
-            valuesX=xList,
-            valuesY=yList,
-            chartTitle=(f"{queryMonthStart:%b %Y}"),
-            chartLabelX='Month',
-            chartLabelY='Electricity Consumption (kWh)',
-            plotColorLine=config['Charts']['electricity_color_line'],
-            plotColorFill=config['Charts']['electricity_color_fill'],
-            plotDateFrom=queryMonthStart,
-            plotDateTo=queryMonthEnd,
-            fileName=(os.path.join(dir, 'Images', 'month', f'electricity-plot-{queryMonthStart:%Y-%m}.png')),
-            # fileName=(os.path.join(dir, 'Images', 'month', f'electricity-plot-{queryMonthStart:%Y-%m}.svg')),
-            majorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
-            minorLocatorAxisX=mdates.DayLocator(),
-            majorFormatterAxisX=mdates.DateFormatter('%d'),
-            minorFormatterAxisX=mdates.DateFormatter('%d')
-        )
-
-        # Gas chart for the month
-        listOfUse = []
-        
-        args = ['Gas', queryMonthStart, queryMonthEnd]
-        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
-        xList, yList = squareData(listOfUse)
-
-        # Create and save a copy of the montly chart
-        customChart(
-            valuesX=xList,
-            valuesY=yList,
-            chartTitle=(f"{queryMonthStart:%b %Y}"),
-            chartLabelX='Month',
-            chartLabelY='Gas Consumption (kWh)',
-            plotColorLine=config['Charts']['gas_color_line'],
-            plotColorFill=config['Charts']['gas_color_fill'],
-            plotDateFrom=queryMonthStart,
-            plotDateTo=queryMonthEnd,
-            fileName=(os.path.join(dir, 'Images', 'month', f'gas-plot-{queryMonthStart:%Y-%m}.png')),
-            # fileName=(os.path.join(dir, 'Images', 'month', f'gas-plot-{queryMonthStart:%Y-%m}.svg')),
-            majorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
-            minorLocatorAxisX=mdates.DayLocator(),
-            majorFormatterAxisX=mdates.DateFormatter('%d'),
-            minorFormatterAxisX=mdates.DateFormatter('%d')
-        )
-
-        currentMonth +=1
-        queryMonthStart = datetime.date(currentYear, currentMonth, 1)
-        if (currentMonth >= 12):
-            currentMonth = 0
-            currentYear +=1
-        queryMonthEnd = datetime.date(currentYear, currentMonth+1, 1)
+    pass
 # ------------------------------------------------------------------------------
 
 def main():
