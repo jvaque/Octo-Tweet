@@ -185,7 +185,7 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
             datetimeFrom = chart[5]
             datetimeTo = chart[6]
             while (datetimeTo < lastRecord[5]):
-                args = ['Electricity', datetimeFrom, datetimeTo]
+                args = [chartType, datetimeFrom, datetimeTo]
                 listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
                 xList, yList = squareData(listOfUse)
 
@@ -195,13 +195,13 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
                     valuesY=yList,
                     chartTitle=(f"{datetimeFrom:%d %b %Y}"),
                     chartLabelX='Time of day (h)',
-                    chartLabelY='Electricity Consumption (kWh)',
-                    plotColorLine=config['Charts']['electricity_color_line'],
-                    plotColorFill=config['Charts']['electricity_color_fill'],
+                    chartLabelY=f'{chartType} Consumption (kWh)',
+                    plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
+                    plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
                     plotDateFrom=datetimeFrom,
                     plotDateTo=datetimeTo,
-                    fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{datetimeFrom:%Y-%m-%d}.png')),
-                    # fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{datetimeFrom:%Y-%m-%d}.svg')),
+                    fileName=(os.path.join(dir, 'Images', 'day', f'{chartType.lower()}-plot-{datetimeFrom:%Y-%m-%d}.png')),
+                    # fileName=(os.path.join(dir, 'Images', 'day', f'{chartType.lower()}-plot-{datetimeFrom:%Y-%m-%d}.svg')),
                     majorLocatorAxisX=mdates.HourLocator(interval=3),
                     minorLocatorAxisX=mdates.HourLocator(),
                     majorFormatterAxisX=mdates.DateFormatter('%H:%M')
@@ -444,6 +444,7 @@ def main():
     dataAccess = MySqlDataAccess(config)
 
     unamedFunctionForNow(dataAccess, config, dir, 'Electricity')
+    unamedFunctionForNow(dataAccess, config, dir, 'Gas')
 
     # dailyCharts(dataAccess, config, dir)
     # weeklyCharts(dataAccess, config, dir)
