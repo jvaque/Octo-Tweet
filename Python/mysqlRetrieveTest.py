@@ -182,10 +182,10 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
     for chart in chartsToMake:
         if(chart[2] == 'Daily'):
             # Here we got the last chart made with chart_last_from and chart_last_to
-            datetimeFrom = chart[5]
-            datetimeTo = chart[6]
-            while (datetimeTo < lastRecord[5]):
-                args = [chartType, datetimeFrom, datetimeTo]
+            datetimeDayFrom = chart[5]
+            datetimeDayTo = chart[6]
+            while (datetimeDayTo < lastRecord[5]):
+                args = [chartType, datetimeDayFrom, datetimeDayTo]
                 listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
                 xList, yList = squareData(listOfUse)
 
@@ -193,166 +193,85 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
                 customChart(
                     valuesX=xList,
                     valuesY=yList,
-                    chartTitle=(f"{datetimeFrom:%d %b %Y}"),
+                    chartTitle=(f"{datetimeDayFrom:%d %b %Y}"),
                     chartLabelX='Time of day (h)',
                     chartLabelY=f'{chartType} Consumption (kWh)',
                     plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
-                    plotDateFrom=datetimeFrom,
-                    plotDateTo=datetimeTo,
-                    fileName=(os.path.join(dir, 'Images', 'day', f'{chartType.lower()}-plot-{datetimeFrom:%Y-%m-%d}.png')),
-                    # fileName=(os.path.join(dir, 'Images', 'day', f'{chartType.lower()}-plot-{datetimeFrom:%Y-%m-%d}.svg')),
+                    plotDateFrom=datetimeDayFrom,
+                    plotDateTo=datetimeDayTo,
+                    fileName=(os.path.join(dir, 'Images', 'day', f'{chartType.lower()}-plot-{datetimeDayFrom:%Y-%m-%d}.png')),
+                    # fileName=(os.path.join(dir, 'Images', 'day', f'{chartType.lower()}-plot-{datetimeDayFrom:%Y-%m-%d}.svg')),
                     majorLocatorAxisX=mdates.HourLocator(interval=3),
                     minorLocatorAxisX=mdates.HourLocator(),
                     majorFormatterAxisX=mdates.DateFormatter('%H:%M')
                 )
 
-                datetimeFrom = datetimeFrom + datetime.timedelta(days=1)
-                datetimeTo = datetimeFrom + datetime.timedelta(days=1)
-            
-            datetimeFrom -= datetime.timedelta(days=1)
-            datetimeTo -= datetime.timedelta(days=1)
+                datetimeDayFrom += datetime.timedelta(days=1)
+                datetimeDayTo += datetime.timedelta(days=1)
 
-            datetimeFromNext = datetimeTo
-            datetimeToNext = datetimeTo + datetime.timedelta(days=1)
+            datetimeDayFromNext = datetimeDayFrom
+            datetimeDayToNext = datetimeDayTo
 
-            args = [chart[0], datetimeFrom, datetimeTo, datetimeFromNext, datetimeToNext]
+            # Decrease as after generating the last chart the datetime values 
+            # would be for the next chart and not the generated ones
+            datetimeDayFrom -= datetime.timedelta(days=1)
+            datetimeDayTo -= datetime.timedelta(days=1)
+
+            args = [chart[0], datetimeDayFrom, datetimeDayTo, datetimeDayFromNext, datetimeDayToNext]
+            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
+
+        elif (chart[2] == 'Weekly'):
+            datetimeWeekFrom = chart[5]
+            datetimeWeekTo = chart[6]
+            titleDayWeekEnd = datetimeWeekFrom + datetime.timedelta(days=6)
+
+            while (datetimeWeekTo < lastRecord[5]):
+                args = [chartType, datetimeWeekFrom, datetimeWeekTo]
+                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+                xList, yList = squareData(listOfUse)
+
+                # Create and save a copy of the weekly chart
+                customChart(
+                    valuesX=xList,
+                    valuesY=yList,
+                    chartTitle=(f"{datetimeWeekFrom:%d %b %Y}-{titleDayWeekEnd:%d %b %Y}"),
+                    chartLabelX='Day (h)',
+                    chartLabelY=f'{chartType} Consumption (kWh)',
+                    plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
+                    plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
+                    plotDateFrom=datetimeWeekFrom,
+                    plotDateTo=datetimeWeekTo,
+                    fileName=(os.path.join(dir, 'Images', 'week', f'{chartType.lower()}-plot-{datetimeWeekFrom:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.png')),
+                    # fileName=(os.path.join(dir, 'Images', 'week', f'{chartType.lower()}-plot-{datetimeWeekFrom:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.svg')),
+                    majorLocatorAxisX=mdates.DayLocator(),
+                    minorLocatorAxisX=mdates.HourLocator(interval=6),
+                    majorFormatterAxisX=mdates.DateFormatter('%a %d'),
+                    minorFormatterAxisX=mdates.DateFormatter('%H')
+                )
+
+                datetimeWeekFrom += datetime.timedelta(weeks=1)
+                datetimeWeekTo += datetime.timedelta(weeks=1)
+                titleDayWeekEnd = datetimeWeekFrom + datetime.timedelta(days=6)
+
+            datetimeWeekFromNext = datetimeWeekFrom
+            datetimeWeekToNext = datetimeWeekTo
+
+            # Decrease as after generating the last chart the datetime values 
+            # would be for the next chart and not the generated ones
+            datetimeWeekFrom -= datetime.timedelta(weeks=1)
+            datetimeWeekTo -= datetime.timedelta(weeks=1)
+
+            args = [chart[0], datetimeWeekFrom, datetimeWeekTo, datetimeWeekFromNext, datetimeWeekToNext]
             dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
     
     print('Finished!')
 
-def dailyCharts(dataAccess, config, dir):
-    # Generate daily charts
-    days = 200
-    # days = 0 # To easily skip when debugging
-    # queryDayStart = datetime.date(2020, 9, 23)
-    queryDayStart = datetime.date(2020, 9, 25)
-    # queryDayStart = datetime.date(2020, 10, 23)
-    # queryDayStart = datetime.date(2021, 3, 22)
-    queryDayEnd = queryDayStart + datetime.timedelta(days=1)
-
-    print('Generating batch of day charts')
-    for day in tqdm(range(days)):
-        # Electricity chart for the day
-        listOfUse = []
-        
-        args = ['Electricity', queryDayStart, queryDayEnd]
-        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
-        xList, yList = squareData(listOfUse)
-
-        # Create and save a copy of the daily chart
-        customChart(
-            valuesX=xList,
-            valuesY=yList,
-            chartTitle=(f"{queryDayStart:%d %b %Y}"),
-            chartLabelX='Time of day (h)',
-            chartLabelY='Electricity Consumption (kWh)',
-            plotColorLine=config['Charts']['electricity_color_line'],
-            plotColorFill=config['Charts']['electricity_color_fill'],
-            plotDateFrom=queryDayStart,
-            plotDateTo=queryDayEnd,
-            fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{queryDayStart:%Y-%m-%d}.png')),
-            # fileName=(os.path.join(dir, 'Images', 'day', f'electricity-plot-{queryDayStart:%Y-%m-%d}.svg')),
-            majorLocatorAxisX=mdates.HourLocator(interval=3),
-            minorLocatorAxisX=mdates.HourLocator(),
-            majorFormatterAxisX=mdates.DateFormatter('%H:%M')
-        )
-
-        # Gas chart for the day
-        listOfUse = []
-        
-        args = ['Gas', queryDayStart, queryDayEnd]
-        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
-        xList, yList = squareData(listOfUse)
-
-        # Create and save a copy of the daily chart
-        customChart(
-            valuesX=xList,
-            valuesY=yList,
-            chartTitle=(f"{queryDayStart:%d %b %Y}"),
-            chartLabelX='Time of day (h)',
-            chartLabelY='Gas Consumption (kWh)',
-            plotColorLine=config['Charts']['gas_color_line'],
-            plotColorFill=config['Charts']['gas_color_fill'],
-            plotDateFrom=queryDayStart,
-            plotDateTo=queryDayEnd,
-            fileName=(os.path.join(dir, 'Images', 'day', f'gas-plot-{queryDayStart:%Y-%m-%d}.png')),
-            # fileName=(os.path.join(dir, 'Images', 'day', f'gas-plot-{queryDayStart:%Y-%m-%d}.svg')),
-            majorLocatorAxisX=mdates.HourLocator(interval=3),
-            minorLocatorAxisX=mdates.HourLocator(),
-            majorFormatterAxisX=mdates.DateFormatter('%H:%M')
-        )
-
-        queryDayStart = queryDayStart + datetime.timedelta(days=1)
-        queryDayEnd = queryDayStart + datetime.timedelta(days=1)
+def dailyChart(dataAccess, config, dir):
+    pass
 
 def weeklyCharts(dataAccess, config, dir):
-    # Generate weekly charts
-    weeks = 30
-    # weeks = 0 # To easily skip when debugging
-    queryWeekStart = datetime.date(2020, 9, 21)
-    # queryWeekStart = datetime.date(2020, 10, 23)
-    # queryWeekStart = datetime.date(2021, 3, 22)
-    queryWeekEnd = queryWeekStart + datetime.timedelta(weeks=1)
-    titleDayWeekEnd = queryWeekStart + datetime.timedelta(days=6)
-
-    print('Generating batch of weekly charts')
-    for week in tqdm(range(weeks)):
-        # Electricity chart for the week
-        listOfUse = []
-        
-        args = ['Electricity', queryWeekStart, queryWeekEnd]
-        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
-        xList, yList = squareData(listOfUse)
-
-        # Create and save a copy of the weekly chart
-        customChart(
-            valuesX=xList,
-            valuesY=yList,
-            chartTitle=(f"{queryWeekStart:%d %b %Y}-{titleDayWeekEnd:%d %b %Y}"),
-            chartLabelX='Day (h)',
-            chartLabelY='Electricity Consumption (kWh)',
-            plotColorLine=config['Charts']['electricity_color_line'],
-            plotColorFill=config['Charts']['electricity_color_fill'],
-            plotDateFrom=queryWeekStart,
-            plotDateTo=queryWeekEnd,
-            fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.png')),
-            # fileName=(os.path.join(dir, 'Images', 'week', f'electricity-plot-{queryWeekStart:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.svg')),
-            majorLocatorAxisX=mdates.DayLocator(),
-            minorLocatorAxisX=mdates.HourLocator(interval=6),
-            majorFormatterAxisX=mdates.DateFormatter('%a %d'),
-            minorFormatterAxisX=mdates.DateFormatter('%H')
-        )
-
-        # Gas chart for the week
-        listOfUse = []
-        
-        args = ['Gas', queryWeekStart, queryWeekEnd]
-        listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
-        xList, yList = squareData(listOfUse)
-
-        # Create and save a copy of the weekly chart
-        customChart(
-            valuesX=xList,
-            valuesY=yList,
-            chartTitle=(f"{queryWeekStart:%d %b %Y}-{titleDayWeekEnd:%d %b %Y}"),
-            chartLabelX='Day (h)',
-            chartLabelY='Gas Consumption (kWh)',
-            plotColorLine=config['Charts']['gas_color_line'],
-            plotColorFill=config['Charts']['gas_color_fill'],
-            plotDateFrom=queryWeekStart,
-            plotDateTo=queryWeekEnd,
-            fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.png')),
-            # fileName=(os.path.join(dir, 'Images', 'week', f'gas-plot-{queryWeekStart:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.svg')),
-            majorLocatorAxisX=mdates.DayLocator(),
-            minorLocatorAxisX=mdates.HourLocator(interval=6),
-            majorFormatterAxisX=mdates.DateFormatter('%a %d'),
-            minorFormatterAxisX=mdates.DateFormatter('%H')
-        )
-
-        queryWeekStart = queryWeekStart + datetime.timedelta(weeks=1)
-        queryWeekEnd = queryWeekStart + datetime.timedelta(weeks=1)
-        titleDayWeekEnd = queryWeekStart + datetime.timedelta(days=6)
+    pass
 
 def montlyCharts(dataAccess, config, dir):
     # Generate monthly charts
