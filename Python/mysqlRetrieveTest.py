@@ -29,6 +29,24 @@ def squareData(listOfUse):
 
     return returnValuesX, returnValuesY
 
+def applyRollingAverage(listOfUse, N):
+    '''
+    Take in a list of consumption values and return two lists for\n
+    the x and y values where the y values have a rolling average \n
+    the size of N applied to them
+    '''
+    returnValuesX = []
+    tempValuesY = []
+    returnValuesY = []
+    
+    for element in listOfUse:
+        returnValuesX.append(element[5])
+        tempValuesY.append(element[2])
+    
+    returnValuesY = np.convolve(tempValuesY, np.ones(N)/N, mode='same')
+    
+    return returnValuesX, returnValuesY
+
 def customChart(valuesX, valuesY, chartTitle, chartLabelX, chartLabelY,
                     plotColorLine, plotColorFill, plotDateFrom, plotDateTo, fileName,
                     majorLocatorAxisX=None, minorLocatorAxisX=None,
@@ -316,7 +334,59 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
 
             args = [chart[0], datetimeMonthFrom, datetimeMonthTo, datetimeMonthFromNext, datetimeMonthToNext]
             dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
-    
+
+        elif (chart[2] == 'Quarterly'):
+            datetimeQuaterDataFrom = chart[5]
+            datetimeQuaterDataTo = chart[6]
+            datetimeQuaterFrom = datetimeQuaterDataFrom + datetime.timedelta(days=7)
+            datetimeQuaterTo = datetimeQuaterDataTo - datetime.timedelta(days=7)
+
+            year = datetimeQuaterTo.year
+            month = datetimeQuaterTo.month
+
+
+            datetimePreviousFrom = datetimeQuaterFrom
+            N = 1 * 24 * 2
+
+            while (datetimeQuaterDataTo < lastRecord[5]):
+                args = [chartType, datetimeQuaterDataFrom, datetimeQuaterDataTo]
+                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+                xList, yList = applyRollingAverage(listOfUse, N)
+
+                # Create and save a copy of the montly chart
+                customChart(
+                    valuesX=xList,
+                    valuesY=yList,
+                    chartTitle=(f"{datetimeQuaterFrom:%d %b %Y}-{datetimeQuaterTo:%d %b %Y}"),
+                    chartLabelX='Quater',
+                    chartLabelY=f'{chartType} Consumption (kWh)',
+                    plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
+                    plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
+                    plotDateFrom=datetimeQuaterFrom,
+                    plotDateTo=datetimeQuaterTo,
+                    fileName=(os.path.join(dir, 'Images', 'quarter', f'{chartType.lower()}-plot-{datetimeQuaterFrom:%Y-%m}.png')),
+                    # fileName=(os.path.join(dir, 'Images', 'quarter', f'{chartType.lower()}-plot-{datetimeQuaterFrom:%Y-%m}.svg')),
+                    majorLocatorAxisX=mdates.MonthLocator(),
+                    minorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
+                    majorFormatterAxisX=mdates.DateFormatter('%b'),
+                    minorFormatterAxisX=mdates.DateFormatter('%d')
+                )
+
+                # increase values by three months
+                datetimePreviousFrom = datetimeQuaterFrom
+
+                datetimeQuaterFrom = datetimeQuaterTo
+                month +=3
+                if (month >= 12):
+                    month = 0
+                    year +=1
+                datetimeQuaterTo = datetime.datetime(year, month+3, 1)
+
+                datetimeQuaterDataFrom = datetimeQuaterFrom - datetime.timedelta(days=7)
+                datetimeQuaterDataTo = datetimeQuaterTo + datetime.timedelta(days=7)
+            
+            # save to the charttracker
+
     print('Finished!')
 
 def dailyChart(dataAccess, config, dir):
@@ -326,7 +396,40 @@ def weeklyCharts(dataAccess, config, dir):
     pass
 
 def montlyCharts(dataAccess, config, dir):
-    pass
+    chartType = 'Gas'
+    rollingAverageLenght = 1
+    N = rollingAverageLenght * 24 * 2
+    N = 4 * 2
+
+    datetimeMonthFrom = datetime.datetime(2020, 11, 1)
+    datetimeMonthTo = datetime.datetime(2020, 12, 1)
+
+    args = [chartType, datetimeMonthFrom - datetime.timedelta(days=rollingAverageLenght), datetimeMonthTo + datetime.timedelta(days=rollingAverageLenght)]
+    listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+    
+    xList, yList = applyRollingAverage(listOfUse, N)
+
+
+    # xList, yList = squareData(listOfUse)
+
+    # Create and save a copy of the montly chart
+    customChart(
+        valuesX=xList,
+        valuesY=yList,
+        chartTitle=(f"{datetimeMonthFrom:%b %Y}"),
+        chartLabelX='Month',
+        chartLabelY=f'{chartType} Consumption (kWh)',
+        plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
+        plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
+        plotDateFrom=datetimeMonthFrom,
+        plotDateTo=datetimeMonthTo,
+        fileName=(os.path.join(dir, 'Images', 'month', f'{chartType.lower()}-plot-4h-rolling-average-{datetimeMonthFrom:%Y-%m}.png')),
+        # fileName=(os.path.join(dir, 'Images', 'month', f'{chartType.lower()}-plot-4h-rolling-average-{datetimeMonthFrom:%Y-%m}.svg')),
+        majorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
+        minorLocatorAxisX=mdates.DayLocator(),
+        majorFormatterAxisX=mdates.DateFormatter('%d'),
+        minorFormatterAxisX=mdates.DateFormatter('%d')
+    )
 # ------------------------------------------------------------------------------
 
 def main():
