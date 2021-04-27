@@ -29,6 +29,16 @@ def squareData(listOfUse):
 
     return returnValuesX, returnValuesY
 
+def addMonthToDatetime(datetimeVariable):
+    year = datetimeVariable.year
+    month = datetimeVariable.month
+    
+    month +=1
+    if (month > 12):
+        month = 1
+        year +=1
+    return datetime.datetime(year, month, 1)
+
 def applyRollingAverage(listOfUse, N):
     '''
     Take in a list of consumption values and return two lists for\n
@@ -336,22 +346,20 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
             dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
 
         elif (chart[2] == 'Quarterly'):
-            datetimeQuaterDataFrom = chart[5]
-            datetimeQuaterDataTo = chart[6]
-            datetimeQuaterFrom = datetimeQuaterDataFrom + datetime.timedelta(days=7)
-            datetimeQuaterTo = datetimeQuaterDataTo - datetime.timedelta(days=7)
+            datetimeQuaterFrom = chart[5]
+            datetimeQuaterTo = chart[6]
 
-            year = datetimeQuaterTo.year
-            month = datetimeQuaterTo.month
-
+            year = datetimeQuaterFrom.year
+            month = datetimeQuaterFrom.month
 
             datetimePreviousFrom = datetimeQuaterFrom
-            N = 1 * 24 * 2
+            # N = 1 * 24 * 2
 
-            while (datetimeQuaterDataTo < lastRecord[5]):
-                args = [chartType, datetimeQuaterDataFrom, datetimeQuaterDataTo]
-                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
-                xList, yList = applyRollingAverage(listOfUse, N)
+            while (datetimeQuaterTo < lastRecord[5]):
+                args = [chartType, datetimeQuaterFrom, datetimeQuaterTo]
+                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
+                # xList, yList = applyRollingAverage(listOfUse, N)
+                xList, yList = squareData(listOfUse)
 
                 # Create and save a copy of the montly chart
                 customChart(
@@ -377,13 +385,10 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
 
                 datetimeQuaterFrom = datetimeQuaterTo
                 month +=3
-                if (month >= 12):
-                    month = 0
+                if (month >= 10):
+                    month = -2
                     year +=1
                 datetimeQuaterTo = datetime.datetime(year, month+3, 1)
-
-                datetimeQuaterDataFrom = datetimeQuaterFrom - datetime.timedelta(days=7)
-                datetimeQuaterDataTo = datetimeQuaterTo + datetime.timedelta(days=7)
             
             # save to the charttracker
 
