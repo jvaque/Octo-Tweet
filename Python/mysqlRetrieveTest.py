@@ -392,6 +392,50 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
             
             # save to the charttracker
 
+        elif (chart[2] == 'Yearly'):
+            datetimeYearFrom = chart[5]
+            datetimeYearTo = chart[6]
+
+            year = datetimeYearTo.year
+            month = datetimeYearTo.month
+
+            datetimePreviousFrom = datetimeYearFrom
+            # N = 1 * 24 * 2
+
+            while (datetimeYearTo < lastRecord[5]):
+                args = [chartType, datetimeYearFrom, datetimeYearTo]
+                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
+                # xList, yList = applyRollingAverage(listOfUse, N)
+                xList, yList = squareData(listOfUse)
+
+                # Create and save a copy of the montly chart
+                customChart(
+                    valuesX=xList,
+                    valuesY=yList,
+                    chartTitle=(f"{datetimeYearFrom:%d %b %Y}-{datetimeYearTo:%d %b %Y}"),
+                    chartLabelX='Year',
+                    chartLabelY=f'{chartType} Consumption (kWh)',
+                    plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
+                    plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
+                    plotDateFrom=datetimeYearFrom,
+                    plotDateTo=datetimeYearTo,
+                    fileName=(os.path.join(dir, 'Images', 'year', f'{chartType.lower()}-plot-{datetimeYearFrom:%Y-%m}.png')),
+                    # fileName=(os.path.join(dir, 'Images', 'year', f'{chartType.lower()}-plot-{datetimeYearFrom:%Y-%m}.svg')),
+                    majorLocatorAxisX=mdates.MonthLocator(),
+                    minorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
+                    majorFormatterAxisX=mdates.DateFormatter('%b'),
+                    minorFormatterAxisX=mdates.DateFormatter('%d')
+                )
+
+                # increase values by three months
+                datetimePreviousFrom = datetimeYearFrom
+
+                datetimeYearFrom = datetimeYearTo
+                year +=1
+                datetimeYearTo = datetime.datetime(year, month, 1)
+            
+            # save to the charttracker
+
     print('Finished!')
 
 def dailyChart(dataAccess, config, dir):
