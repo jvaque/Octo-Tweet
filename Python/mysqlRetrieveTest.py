@@ -29,14 +29,20 @@ def squareData(listOfUse):
 
     return returnValuesX, returnValuesY
 
-def addMonthToDatetime(datetimeVariable):
+def addMonthsToDatetime(datetimeVariable, months):
     year = datetimeVariable.year
     month = datetimeVariable.month
     
-    month +=1
+    yearsToAdd = months // 12
+    monthsToAdd = months % 12
+    
+    month += monthsToAdd
+    year += yearsToAdd
+
     if (month > 12):
-        month = 1
+        month -= 12
         year +=1
+    
     return datetime.datetime(year, month, 1)
 
 def applyRollingAverage(listOfUse, N):
@@ -296,8 +302,6 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
         elif (chart[2] == 'Monthly'):
             datetimeMonthFrom = chart[5]
             datetimeMonthTo = chart[6]
-            year = datetimeMonthFrom.year
-            month = datetimeMonthFrom.month
 
             datetimePreviousFrom = datetimeMonthFrom
 
@@ -327,12 +331,8 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
 
                 datetimePreviousFrom = datetimeMonthFrom
 
-                month +=1
-                datetimeMonthFrom = datetime.datetime(year, month, 1)
-                if (month >= 12):
-                    month = 0
-                    year +=1
-                datetimeMonthTo = datetime.datetime(year, month+1, 1)
+                datetimeMonthFrom = addMonthsToDatetime(datetimeMonthFrom, 1)
+                datetimeMonthTo = addMonthsToDatetime(datetimeMonthTo, 1)
 
             datetimeMonthFromNext = datetimeMonthFrom
             datetimeMonthToNext = datetimeMonthTo
@@ -348,9 +348,6 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
         elif (chart[2] == 'Quarterly'):
             datetimeQuaterFrom = chart[5]
             datetimeQuaterTo = chart[6]
-
-            year = datetimeQuaterFrom.year
-            month = datetimeQuaterFrom.month
 
             datetimePreviousFrom = datetimeQuaterFrom
             # N = 1 * 24 * 2
@@ -383,21 +380,14 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
                 # increase values by three months
                 datetimePreviousFrom = datetimeQuaterFrom
 
-                datetimeQuaterFrom = datetimeQuaterTo
-                month +=3
-                if (month >= 10):
-                    month = -2
-                    year +=1
-                datetimeQuaterTo = datetime.datetime(year, month+3, 1)
+                datetimeQuaterFrom = addMonthsToDatetime(datetimeQuaterFrom, 3)
+                datetimeQuaterTo = addMonthsToDatetime(datetimeQuaterTo, 3)
             
             # save to the charttracker
 
         elif (chart[2] == 'Yearly'):
             datetimeYearFrom = chart[5]
             datetimeYearTo = chart[6]
-
-            year = datetimeYearTo.year
-            month = datetimeYearTo.month
 
             datetimePreviousFrom = datetimeYearFrom
             # N = 1 * 24 * 2
@@ -430,9 +420,8 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
                 # increase values by three months
                 datetimePreviousFrom = datetimeYearFrom
 
-                datetimeYearFrom = datetimeYearTo
-                year +=1
-                datetimeYearTo = datetime.datetime(year, month, 1)
+                datetimeYearFrom = addMonthsToDatetime(datetimeYearFrom, 12)
+                datetimeYearTo = addMonthsToDatetime(datetimeYearTo, 12)
             
             # save to the charttracker
 
