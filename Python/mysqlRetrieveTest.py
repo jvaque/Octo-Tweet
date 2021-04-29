@@ -329,6 +329,28 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
                     minorFormatterAxisX=mdates.DateFormatter('%d')
                 )
 
+                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
+                xList, yList = squareData(listOfUse)
+
+                # Create and save a copy of the montly chart
+                customChart(
+                    valuesX=xList,
+                    valuesY=yList,
+                    chartTitle=(f"{datetimeMonthFrom:%b %Y}"),
+                    chartLabelX='Month',
+                    chartLabelY=f'{chartType} Daily Consumption (kWh)',
+                    plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
+                    plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
+                    plotDateFrom=datetimeMonthFrom,
+                    plotDateTo=datetimeMonthTo,
+                    fileName=(os.path.join(dir, 'Images', 'month', f'{chartType.lower()}-daily-plot-{datetimeMonthFrom:%Y-%m}.png')),
+                    # fileName=(os.path.join(dir, 'Images', 'month', f'{chartType.lower()}-daily-plot-{datetimeMonthFrom:%Y-%m}.svg')),
+                    majorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
+                    minorLocatorAxisX=mdates.DayLocator(),
+                    majorFormatterAxisX=mdates.DateFormatter('%d'),
+                    minorFormatterAxisX=mdates.DateFormatter('%d')
+                )
+
                 datetimePreviousFrom = datetimeMonthFrom
 
                 datetimeMonthFrom = addMonthsToDatetime(datetimeMonthFrom, 1)
@@ -342,8 +364,8 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
             datetimeMonthFrom = datetimePreviousFrom
             datetimeMonthTo = datetimeMonthFromNext
 
-            args = [chart[0], datetimeMonthFrom, datetimeMonthTo, datetimeMonthFromNext, datetimeMonthToNext]
-            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
+            # args = [chart[0], datetimeMonthFrom, datetimeMonthTo, datetimeMonthFromNext, datetimeMonthToNext]
+            # dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
 
         elif (chart[2] == 'Quarterly'):
             datetimeQuaterFrom = chart[5]
@@ -404,7 +426,7 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
                     valuesY=yList,
                     chartTitle=(f"{datetimeYearFrom:%d %b %Y}-{datetimeYearTo:%d %b %Y}"),
                     chartLabelX='Year',
-                    chartLabelY=f'{chartType} Consumption (kWh)',
+                    chartLabelY=f'{chartType} Daily Consumption (kWh)',
                     plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
                     plotDateFrom=datetimeYearFrom,
