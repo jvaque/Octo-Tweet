@@ -1,25 +1,67 @@
-# This function is to be the one that calls all of the other ones in the correct order
 import sys
+import argparse
+import datetime
 
-def main(*args):
-    # Take in arguments to select what type of graphs to make and tweet
-    for arg in args:
-        print(arg)
 
-    # Retrieve the data for the desired graph to be made
-    print("You have retrieved the data for ...")
+def parseArguments(args_in):
+    # Create the parser
+    parser = argparse.ArgumentParser(description='Generate and Tweet charts.',
+                                     allow_abbrev=False)
 
-    # Create graph from graph library
-    print("Generated the graph with the given data")
+    # Add the arguments
+    parser.version = '1.0.0'
+    parser.add_argument('datetime_from',
+                        type=datetime.datetime.fromisoformat,
+                        help='datetime from for chart in ISO format')
 
-    # Tweet using the twitter api
-    print("Tweeted to your profile")
+    parser.add_argument('datetime_to',
+                        type=datetime.datetime.fromisoformat,
+                        help='datetime to for chart in ISO format')
 
-    # Log when the program was run and if it was successful
+    parser.add_argument('-t',
+                        '--tweet',
+                        action='store_true',
+                        help='tweet the generated charts')
+
+    parser.add_argument('-l',
+                        '--lazy',
+                        action='store_true',
+                        help='skip generating charts, only update database')
+
+    parser.add_argument('-v',
+                        '--version',
+                        action='version')
+
+    # parser.add_argument()
+    # parser.add_argument_group()
+
+    # Execute the parse_args() method
+    args = parser.parse_args()
+    
+    print() # Just here for placing a breakpoint
+
+# def main(*args):
+#     # Take in arguments to select what type of graphs to make and tweet
+#     for arg in args:
+#         print(arg)
+
+#     # Retrieve the data for the desired graph to be made
+#     print("You have retrieved the data for ...")
+
+#     # Create graph from graph library
+#     print("Generated the graph with the given data")
+
+#     # Tweet using the twitter api
+#     print("Tweeted to your profile")
+
+#     # Log when the program was run and if it was successful
 
 if __name__ == "__main__":
-    print("So far the arguments I want to be able to take in are as follow:")
-    print("--day --week --month --year -d -w -m -y")
-    print("And if I think of more I will add them in the future")
-    print("You have started the app")
-    main(*sys.argv[1:])
+    # print("So far the arguments I want to be able to take in are as follow:")
+    # print("--day --week --month --year -d -w -m -y")
+    # "args": ["--day", "--week", "--month", "--year", "-d", "-w", "-m", "-y"]
+    # print("And if I think of more I will add them in the future")
+    # print("You have started the app")
+    # print()
+    parseArguments(sys.argv)
+    # main(*sys.argv[1:])
