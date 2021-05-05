@@ -8,6 +8,8 @@ def parseArguments(args_in):
     parser = argparse.ArgumentParser(description='Generate and Tweet charts.',
                                      allow_abbrev=False)
 
+    group = parser.add_mutually_exclusive_group()
+
     # Add the arguments
     parser.version = '1.0.0'
 
@@ -26,14 +28,14 @@ def parseArguments(args_in):
                         action='store',
                         nargs='+',
                         choices=['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly'],
-                        help='list of charts to generate between the given dates')
+                        help='select the type of charts to generate between the given dates')
 
-    parser.add_argument('-t',
+    group.add_argument('-t',
                         '--tweet',
                         action='store_true',
                         help='tweet the generated charts')
 
-    parser.add_argument('-l',
+    group.add_argument('-l',
                         '--lazy',
                         action='store_true',
                         help='skip generating charts, only update database')
@@ -48,7 +50,7 @@ def parseArguments(args_in):
     # Execute the parse_args() method
     args = parser.parse_args()
     
-    print(args) # Just here for placing a breakpoint
+    print(vars(args)) # Just here for placing a breakpoint
 
 # def main(*args):
 #     # Take in arguments to select what type of graphs to make and tweet
