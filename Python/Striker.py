@@ -10,13 +10,23 @@ def parseArguments(args_in):
 
     # Add the arguments
     parser.version = '1.0.0'
+
     parser.add_argument('datetime_from',
+                        action='store',
                         type=datetime.datetime.fromisoformat,
                         help='datetime from for chart in ISO format')
 
     parser.add_argument('datetime_to',
+                        action='store',
                         type=datetime.datetime.fromisoformat,
                         help='datetime to for chart in ISO format')
+
+    parser.add_argument('-c',
+                        '--charts',
+                        action='store',
+                        nargs='+',
+                        choices=['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly'],
+                        help='list of charts to generate between the given dates')
 
     parser.add_argument('-t',
                         '--tweet',
@@ -38,7 +48,7 @@ def parseArguments(args_in):
     # Execute the parse_args() method
     args = parser.parse_args()
     
-    print() # Just here for placing a breakpoint
+    print(args) # Just here for placing a breakpoint
 
 # def main(*args):
 #     # Take in arguments to select what type of graphs to make and tweet
