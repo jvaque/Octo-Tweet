@@ -2,6 +2,18 @@ import sys
 import argparse
 import datetime
 
+def manualCharts(args):
+    if(args.charts != None):
+        for chart in args.charts:
+            print(chart)
+
+def automaticCharts(args):
+    if(args.lazy):
+        print("Will skip generating or tweeting charts")
+    elif(args.tweet):
+        print("Will tweet the charts after generated")
+    else:
+        print("Will just generate the charts")
 
 def parseArguments():
     # Create the parser
@@ -37,6 +49,8 @@ def parseArguments():
         choices=['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly'],
         help='select the type of charts to generate between the given dates')
 
+    manual_parser.set_defaults(func=manualCharts)
+
     data_group.add_argument(
         '-t',
         '--tweet',
@@ -48,6 +62,8 @@ def parseArguments():
         '--lazy',
         action='store_true',
         help='skip generating charts, only update database')
+
+    data_parser.set_defaults(func=automaticCharts)
 
     parser.add_argument(
         '-v',
@@ -82,10 +98,7 @@ def parseArguments():
 
 def main():
     args = parseArguments()
-
-    if(args.charts != None):
-        for chart in args.charts:
-            print(chart)
+    args.func(args)
 
 if __name__ == "__main__":
     main()
