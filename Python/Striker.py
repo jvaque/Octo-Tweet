@@ -19,16 +19,17 @@ def parseArguments():
     # Create the parser
     parser = argparse.ArgumentParser(description='Generate and Tweet charts.',
                                      allow_abbrev=False)
-
     subparser = parser.add_subparsers()
 
-    manual_parser = subparser.add_parser('charts')
-    data_parser = subparser.add_parser('generate')
-
-    data_group = data_parser.add_mutually_exclusive_group()
-
-    # Add the arguments
     parser.version = '1.0.0'
+
+    parser.add_argument(
+        '-v',
+        '--version',
+        action='version')
+
+    # charts
+    manual_parser = subparser.add_parser('charts')
 
     manual_parser.add_argument(
         'datetime_from',
@@ -51,6 +52,12 @@ def parseArguments():
 
     manual_parser.set_defaults(func=manualCharts)
 
+
+    # generate
+    data_parser = subparser.add_parser('generate')
+
+    data_group = data_parser.add_mutually_exclusive_group()
+
     data_group.add_argument(
         '-t',
         '--tweet',
@@ -65,17 +72,8 @@ def parseArguments():
 
     data_parser.set_defaults(func=automaticCharts)
 
-    parser.add_argument(
-        '-v',
-        '--version',
-        action='version')
-
-    # parser.add_argument()
-    # parser.add_argument_group()
-
     # Execute the parse_args() method
     args = parser.parse_args()
-    
     print(vars(args)) # Just here for placing a breakpoint
 
     return args
