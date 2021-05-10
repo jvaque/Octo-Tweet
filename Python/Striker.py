@@ -78,22 +78,6 @@ def parseArguments():
 
     return args
 
-# def main(*args):
-#     # Take in arguments to select what type of graphs to make and tweet
-#     for arg in args:
-#         print(arg)
-
-#     # Retrieve the data for the desired graph to be made
-#     print("You have retrieved the data for ...")
-
-#     # Create graph from graph library
-#     print("Generated the graph with the given data")
-
-#     # Tweet using the twitter api
-#     print("Tweeted to your profile")
-
-#     # Log when the program was run and if it was successful
-
 def main():
     args = parseArguments()
     args.func(args)
