@@ -1,19 +1,31 @@
+import os
+import json
 import sys
 import argparse
 import datetime
 
-def manualCharts(args):
+import mysqlRetrieveTest # This name is only temporary
+
+def manualCharts(config, dir, args):
     if(args.charts != None):
         for chart in args.charts:
             print(chart)
 
-def automaticCharts(args):
+def automaticCharts(config, dir, args):
     if(args.lazy):
         print("Will skip generating or tweeting charts")
     elif(args.tweet):
         print("Will tweet the charts after generated")
     else:
         print("Will just generate the charts")
+        mysqlRetrieveTest.makeImagesFoldersIfMissing(dir)
+        # Maybe only run this if a specific flag is passed in so that it isn't 
+        #  constantly checking every time the script is run
+
+        dataAccess = mysqlRetrieveTest.MySqlDataAccess(config)
+
+        mysqlRetrieveTest.unamedFunctionForNow(dataAccess, config, dir, 'Electricity')
+        mysqlRetrieveTest.unamedFunctionForNow(dataAccess, config, dir, 'Gas')
 
 def parseArguments():
     # Create the parser
@@ -79,8 +91,15 @@ def parseArguments():
     return args
 
 def main():
+    # Get path to the python script being run
+    dir = os.path.abspath(os.path.dirname(__file__))
+
+    # Retrieve values from config file
+    with open(os.path.join(dir, 'appsettings.json'), 'r') as f:
+        config = json.load(f)
+
     args = parseArguments()
-    args.func(args)
+    args.func(config, dir, args)
 
 if __name__ == "__main__":
     main()
