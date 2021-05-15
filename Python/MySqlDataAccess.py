@@ -1,3 +1,5 @@
+import mysql.connector
+
 class MySqlDataAccess:
     def __init__(self, config):
         self._config = config

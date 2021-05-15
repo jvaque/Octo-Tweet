@@ -4,6 +4,8 @@ import sys
 import argparse
 import datetime
 
+from MySqlDataAccess import MySqlDataAccess
+
 import mysqlRetrieveTest # This name is only temporary
 
 def manualCharts(config, dir, args):
@@ -22,7 +24,7 @@ def automaticCharts(config, dir, args):
         # Maybe only run this if a specific flag is passed in so that it isn't 
         #  constantly checking every time the script is run
 
-        dataAccess = mysqlRetrieveTest.MySqlDataAccess(config)
+        dataAccess = MySqlDataAccess(config)
 
         mysqlRetrieveTest.unamedFunctionForNow(dataAccess, config, dir, 'Electricity')
         mysqlRetrieveTest.unamedFunctionForNow(dataAccess, config, dir, 'Gas')
