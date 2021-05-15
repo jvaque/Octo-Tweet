@@ -1,7 +1,5 @@
 import os
 import datetime
-import mysql.connector
-from mysql.connector import errorcode
 from tqdm import tqdm
 
 
@@ -127,64 +125,6 @@ def customChart(valuesX, valuesY, chartTitle, chartLabelX, chartLabelY,
     plt.close()
 
 # ------------------------------------------------------------------------------
-class MySqlDataAccess:
-    def __init__(self, config):
-        self._config = config
-
-    def callStoredProcedure(self, storedProcedureName, args, connectionStringName):
-        try:
-            cnx = mysql.connector.connect(
-                user=self._config[connectionStringName]['user_name'],
-                password=self._config[connectionStringName]['password'],
-                host=self._config[connectionStringName]['host'],
-                database=self._config[connectionStringName]['database_name'])
-            
-            cursor = cnx.cursor()
-
-            resultArgs = cursor.callproc(storedProcedureName, args)
-
-            for element in cursor.stored_results():
-                listOfResults = element.fetchall()
-
-        except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Something is wrong with your user name or password")
-            elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                print("Database does not exist")
-            else:
-                print(err)
-
-        finally:
-            cursor.close()
-            cnx.close()
-        
-        return listOfResults
-    
-    def saveData(self, storedProcedureName, args, connectionStringName):
-        try:
-            cnx = mysql.connector.connect(
-                user=self._config[connectionStringName]['user_name'],
-                password=self._config[connectionStringName]['password'],
-                host=self._config[connectionStringName]['host'],
-                database=self._config[connectionStringName]['database_name'])
-            
-            cursor = cnx.cursor()
-
-            cursor.callproc(storedProcedureName, args)
-            cnx.commit()
-
-        except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Something is wrong with your user name or password")
-            elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                print("Database does not exist")
-            else:
-                print(err)
-
-        finally:
-            cursor.close()
-            cnx.close()
-
 def makeImagesFoldersIfMissing(baseDir):
     listOfDirs = ['day', 'week', 'month', 'quarter', 'year']
     for folder in listOfDirs:
@@ -203,13 +143,13 @@ def makeImagesFoldersIfMissing(baseDir):
 def unamedFunctionForNow(dataAccess, config, dir, chartType):
     # For now have to do this 
     # args = [chartType]
-    # dataSourceRecord = dataAccess.callStoredProcedure('spDataSources_SelectByName', args, 'MySql')
+    # dataSourceRecord = dataAccess.loadData('spDataSources_SelectByName', args, 'MySql')
 
     args = [chartType]
-    lastRecord = dataAccess.callStoredProcedure('spDataValues_SelectLatestSavedRecord', args, 'MySql')[0]
+    lastRecord = dataAccess.loadData('spDataValues_SelectLatestSavedRecord', args, 'MySql')[0]
 
     args = [chartType, lastRecord[5]]
-    chartsToMake = dataAccess.callStoredProcedure('spChartTracker_SelectChartsToMake', args, 'MySql')
+    chartsToMake = dataAccess.loadData('spChartTracker_SelectChartsToMake', args, 'MySql')
 
     # End of temp to debug
 
@@ -220,7 +160,7 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
             datetimeDayTo = chart[6]
             while (datetimeDayTo < lastRecord[5]):
                 args = [chartType, datetimeDayFrom, datetimeDayTo]
-                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+                listOfUse = dataAccess.loadData('spDataValues_SelectRecordsFromRange', args, 'MySql')
                 xList, yList = squareData(listOfUse)
 
                 # Create and save a copy of the daily chart
@@ -262,7 +202,7 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
 
             while (datetimeWeekTo < lastRecord[5]):
                 args = [chartType, datetimeWeekFrom, datetimeWeekTo]
-                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+                listOfUse = dataAccess.loadData('spDataValues_SelectRecordsFromRange', args, 'MySql')
                 xList, yList = squareData(listOfUse)
 
                 # Create and save a copy of the weekly chart
@@ -307,7 +247,7 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
 
             while (datetimeMonthTo < lastRecord[5]):
                 args = [chartType, datetimeMonthFrom, datetimeMonthTo]
-                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+                listOfUse = dataAccess.loadData('spDataValues_SelectRecordsFromRange', args, 'MySql')
                 xList, yList = squareData(listOfUse)
 
                 # Create and save a copy of the montly chart
@@ -329,7 +269,7 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
                     minorFormatterAxisX=mdates.DateFormatter('%d')
                 )
 
-                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
+                listOfUse = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
                 xList, yList = squareData(listOfUse)
 
                 # Create and save a copy of the montly chart
@@ -376,7 +316,7 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
 
             while (datetimeQuaterTo < lastRecord[5]):
                 args = [chartType, datetimeQuaterFrom, datetimeQuaterTo]
-                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
+                listOfUse = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
                 # xList, yList = applyRollingAverage(listOfUse, N)
                 xList, yList = squareData(listOfUse)
 
@@ -416,7 +356,7 @@ def unamedFunctionForNow(dataAccess, config, dir, chartType):
 
             while (datetimeYearTo < lastRecord[5]):
                 args = [chartType, datetimeYearFrom, datetimeYearTo]
-                listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
+                listOfUse = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
                 # xList, yList = applyRollingAverage(listOfUse, N)
                 xList, yList = squareData(listOfUse)
 
@@ -465,7 +405,7 @@ def montlyCharts(dataAccess, config, dir):
     datetimeMonthTo = datetime.datetime(2020, 12, 1)
 
     args = [chartType, datetimeMonthFrom - datetime.timedelta(days=rollingAverageLenght), datetimeMonthTo + datetime.timedelta(days=rollingAverageLenght)]
-    listOfUse = dataAccess.callStoredProcedure('spDataValues_SelectRecordsFromRange', args, 'MySql')
+    listOfUse = dataAccess.loadData('spDataValues_SelectRecordsFromRange', args, 'MySql')
     
     xList, yList = applyRollingAverage(listOfUse, N)
 
