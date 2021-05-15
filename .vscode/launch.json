@@ -8,7 +8,8 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            // "program": "${file}",
+            "program": "${workspaceFolder}/Python/Striker.py",
             "console": "integratedTerminal",
             //"args": ["charts", "2011-11-04 05:05:23", "2014-12-01 16:05:23", "Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]
             "args": ["generate"]
