@@ -5,6 +5,7 @@ import argparse
 import datetime
 
 from MySqlDataAccess import MySqlDataAccess
+from Tweet import Tweet
 
 import mysqlRetrieveTest # This name is only temporary
 
@@ -18,6 +19,13 @@ def automaticCharts(config, dir, args):
         print("Will skip generating or tweeting charts")
     elif(args.tweet):
         print("Will tweet the charts after generated")
+        chirp = Tweet(config)
+        # chirp.postStatus('This is more testing')
+        chirp.postMedia('D:/Source/Octo-Tweet/Python/Images/month/gas-daily-plot-2020-11.png', 'Testing!!!\nThis is an example of a monthly chart')
+
+    elif(args.folders):
+        print('Generating the folders for the charts')
+        # TODO: Add generate the folders if this flag is set
     else:
         print("Will just generate the charts")
         mysqlRetrieveTest.makeImagesFoldersIfMissing(dir)
@@ -83,6 +91,12 @@ def parseArguments():
         '--lazy',
         action='store_true',
         help='skip generating charts, only update database')
+
+    data_group.add_argument(
+        '-f',
+        '--folders',
+        action='store_true',
+        help='create the chart folders if missing')
 
     data_parser.set_defaults(func=automaticCharts)
 
