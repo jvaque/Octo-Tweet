@@ -1,5 +1,4 @@
 import tweepy
-import json
 
 class Tweet:
     def __init__(self, config):
