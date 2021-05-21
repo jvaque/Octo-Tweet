@@ -161,7 +161,7 @@ namespace Quarterback
             // Add quaterly chart
 
             DateTime quarterStart = firstMonth;
-            while (quarterStart.Month != 1 && quarterStart.Month != 3 && quarterStart.Month != 6 && quarterStart.Month != 9)
+            while (quarterStart.Month != 1 && quarterStart.Month != 4 && quarterStart.Month != 7 && quarterStart.Month != 10)
             {
                 quarterStart = quarterStart.AddMonths(-1);
             }
@@ -169,10 +169,10 @@ namespace Quarterback
             {
                 Data_source_id = energySourceModel.Data_source_id,
                 Chart_type = "Quarterly",
-                Chart_last_from = quarterStart.AddMonths(-3) - TimeSpan.FromDays(7),
-                Chart_last_to = quarterStart + TimeSpan.FromDays(7),
-                Chart_next_from = quarterStart - TimeSpan.FromDays(7),
-                Chart_next_to = quarterStart.AddMonths(3) + TimeSpan.FromDays(7)
+                Chart_last_from = quarterStart.AddMonths(-3),
+                Chart_last_to = quarterStart,
+                Chart_next_from = quarterStart,
+                Chart_next_to = quarterStart.AddMonths(3)
             });
             // Add yearly chart
 
@@ -181,12 +181,14 @@ namespace Quarterback
             {
                 Data_source_id = energySourceModel.Data_source_id,
                 Chart_type = "Yearly",
-                Chart_last_from = yearStart.AddMonths(-12) - TimeSpan.FromDays(14),
-                Chart_last_to = yearStart + TimeSpan.FromDays(14),
-                Chart_next_from = yearStart - TimeSpan.FromDays(14),
-                Chart_next_to = yearStart.AddMonths(12) + TimeSpan.FromDays(14)
+                Chart_last_from = yearStart.AddMonths(-12),
+                Chart_last_to = yearStart,
+                Chart_next_from = yearStart,
+                Chart_next_to = yearStart.AddMonths(12)
             });
             // Add rolling yearly chart
+
+
             // Save charts to make
             await _chartTracker.SaveChartsToTrackerAsync(chartsToMake);
         }
