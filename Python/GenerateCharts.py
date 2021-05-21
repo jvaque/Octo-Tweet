@@ -1,5 +1,16 @@
 # Mental note, probably won't work first try as there will be missing
 # imports, check from the file you copied the experimenting code from
+import os
+import datetime
+# from tqdm import tqdm
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+# from datetime import datetime
+# import csv
+# import json
 
 def squareData(listOfUse):
     '''
