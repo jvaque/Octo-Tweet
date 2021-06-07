@@ -4,6 +4,7 @@ import sys
 import argparse
 import datetime
 
+import ChartTracker
 from MySqlDataAccess import MySqlDataAccess
 from Tweet import Tweet
 
@@ -26,16 +27,16 @@ def automaticCharts(config, dir, args):
     elif(args.folders):
         print('Generating the folders for the charts')
         # TODO: Add generate the folders if this flag is set
+        mysqlRetrieveTest.makeImagesFoldersIfMissing(dir)
     else:
         print("Will just generate the charts")
-        mysqlRetrieveTest.makeImagesFoldersIfMissing(dir)
         # Maybe only run this if a specific flag is passed in so that it isn't 
         #  constantly checking every time the script is run
 
         dataAccess = MySqlDataAccess(config)
 
-        mysqlRetrieveTest.unamedFunctionForNow(dataAccess, config, dir, 'Electricity')
-        mysqlRetrieveTest.unamedFunctionForNow(dataAccess, config, dir, 'Gas')
+        ChartTracker.generateIfAvailable(dataAccess, config, dir, 'Electricity')
+        ChartTracker.generateIfAvailable(dataAccess, config, dir, 'Gas')
 
 def parseArguments():
     # Create the parser

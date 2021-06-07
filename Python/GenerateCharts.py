@@ -28,22 +28,6 @@ def squareData(listOfUse):
 
     return returnValuesX, returnValuesY
 
-def addMonthsToDatetime(datetimeVariable, months):
-    year = datetimeVariable.year
-    month = datetimeVariable.month
-    
-    yearsToAdd = months // 12
-    monthsToAdd = months % 12
-    
-    month += monthsToAdd
-    year += yearsToAdd
-
-    if (month > 12):
-        month -= 12
-        year +=1
-    
-    return datetime.datetime(year, month, 1)
-
 def applyRollingAverage(listOfUse, N):
     '''
     Take in a list of consumption values and return two lists for\n
