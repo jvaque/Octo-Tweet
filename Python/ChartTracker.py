@@ -172,8 +172,8 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             datetimeMonthFrom = datetimePreviousFrom
             datetimeMonthTo = datetimeMonthFromNext
 
-            # args = [chart[0], datetimeMonthFrom, datetimeMonthTo, datetimeMonthFromNext, datetimeMonthToNext]
-            # dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
+            args = [chart[0], datetimeMonthFrom, datetimeMonthTo, datetimeMonthFromNext, datetimeMonthToNext]
+            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
 
         elif (chart[2] == 'Quarterly'):
             datetimeQuaterFrom = chart[5]
