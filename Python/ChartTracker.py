@@ -26,7 +26,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
     for chart in chartsToMake:
         if(chart[2] == 'Daily'):
-            generatedChartFilenames = []
+            generatedChartFilePaths = []
 
             datetimeDayFrom = chart[5]
             datetimeDayTo = chart[6]
@@ -34,6 +34,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             while (datetimeDayTo < lastRecord[5]):
                 fileName = f'{chartType.lower()}-plot-{datetimeDayFrom:%Y-%m-%d}.png'
                 # fileName = f'{chartType.lower()}-plot-{datetimeDayFrom:%Y-%m-%d}.svg'
+                fullFilePath = os.path.join(dir, 'Images', 'day', fileName)
 
                 args = [chartType, datetimeDayFrom, datetimeDayTo]
                 listOfUse = dataAccess.loadData('spDataValues_SelectRecordsFromRange', args, 'MySql')
@@ -50,13 +51,13 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
                     plotDateFrom=datetimeDayFrom,
                     plotDateTo=datetimeDayTo,
-                    fileName=(os.path.join(dir, 'Images', 'day', fileName)),
+                    fileName=fullFilePath,
                     majorLocatorAxisX=mdates.HourLocator(interval=3),
                     minorLocatorAxisX=mdates.HourLocator(),
                     majorFormatterAxisX=mdates.DateFormatter('%H:%M')
                 )
 
-                generatedChartFilenames.append(fileName)
+                generatedChartFilePaths.append(fullFilePath)
 
                 datetimeDayFrom += datetime.timedelta(days=1)
                 datetimeDayTo += datetime.timedelta(days=1)
@@ -72,10 +73,10 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             args = [chart[0], datetimeDayFrom, datetimeDayTo, datetimeDayFromNext, datetimeDayToNext]
             dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
 
-            chartsGenerated[chartType][chart[2]] = generatedChartFilenames
+            chartsGenerated[chartType][chart[2]] = generatedChartFilePaths
 
         elif (chart[2] == 'Weekly'):
-            generatedChartFilenames = []
+            generatedChartFilePaths = []
 
             datetimeWeekFrom = chart[5]
             datetimeWeekTo = chart[6]
@@ -84,6 +85,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             while (datetimeWeekTo < lastRecord[5]):
                 fileName = f'{chartType.lower()}-plot-{datetimeWeekFrom:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.png'
                 # fileName = f'{chartType.lower()}-plot-{datetimeWeekFrom:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.svg'
+                fullFilePath = os.path.join(dir, 'Images', 'week', fileName)
 
                 args = [chartType, datetimeWeekFrom, datetimeWeekTo]
                 listOfUse = dataAccess.loadData('spDataValues_SelectRecordsFromRange', args, 'MySql')
@@ -100,14 +102,14 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
                     plotDateFrom=datetimeWeekFrom,
                     plotDateTo=datetimeWeekTo,
-                    fileName=(os.path.join(dir, 'Images', 'week', fileName)),
+                    fileName=fullFilePath,
                     majorLocatorAxisX=mdates.DayLocator(),
                     minorLocatorAxisX=mdates.HourLocator(interval=6),
                     majorFormatterAxisX=mdates.DateFormatter('%a %d'),
                     minorFormatterAxisX=mdates.DateFormatter('%H')
                 )
 
-                generatedChartFilenames.append(fileName)
+                generatedChartFilePaths.append(fullFilePath)
 
                 datetimeWeekFrom += datetime.timedelta(weeks=1)
                 datetimeWeekTo += datetime.timedelta(weeks=1)
@@ -124,10 +126,10 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             args = [chart[0], datetimeWeekFrom, datetimeWeekTo, datetimeWeekFromNext, datetimeWeekToNext]
             dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
 
-            chartsGenerated[chartType][chart[2]] = generatedChartFilenames
+            chartsGenerated[chartType][chart[2]] = generatedChartFilePaths
 
         elif (chart[2] == 'Monthly'):
-            generatedChartFilenames = []
+            generatedChartFilePaths = []
 
             datetimeMonthFrom = chart[5]
             datetimeMonthTo = chart[6]
@@ -139,6 +141,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
                 fileName = f'{chartType.lower()}-plot-{datetimeMonthFrom:%Y-%m}.png'
                 # fileName = f'{chartType.lower()}-plot-{datetimeMonthFrom:%Y-%m}.svg'
+                fullFilePath = os.path.join(dir, 'Images', 'month', fileName)
 
                 args = [chartType, datetimeMonthFrom, datetimeMonthTo]
                 listOfUse = dataAccess.loadData('spDataValues_SelectRecordsFromRange', args, 'MySql')
@@ -155,17 +158,18 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
                     plotDateFrom=datetimeMonthFrom,
                     plotDateTo=datetimeMonthTo,
-                    fileName=(os.path.join(dir, 'Images', 'month', fileName)),
+                    fileName=fullFilePath,
                     majorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
                     minorLocatorAxisX=mdates.DayLocator(),
                     majorFormatterAxisX=mdates.DateFormatter('%d'),
                     minorFormatterAxisX=mdates.DateFormatter('%d')
                 )
 
-                tempMonthlyGrouping.append(fileName)
+                tempMonthlyGrouping.append(fullFilePath)
 
                 fileName = f'{chartType.lower()}-daily-plot-{datetimeMonthFrom:%Y-%m}.png'
                 # fileName = f'{chartType.lower()}-daily-plot-{datetimeMonthFrom:%Y-%m}.svg'
+                fullFilePath = os.path.join(dir, 'Images', 'month', fileName)
 
                 listOfUse = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
                 xList, yList = GenerateCharts.squareData(listOfUse)
@@ -181,15 +185,15 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
                     plotDateFrom=datetimeMonthFrom,
                     plotDateTo=datetimeMonthTo,
-                    fileName=(os.path.join(dir, 'Images', 'month', fileName)),
+                    fileName=fullFilePath,
                     majorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
                     minorLocatorAxisX=mdates.DayLocator(),
                     majorFormatterAxisX=mdates.DateFormatter('%d'),
                     minorFormatterAxisX=mdates.DateFormatter('%d')
                 )
 
-                tempMonthlyGrouping.append(fileName)
-                generatedChartFilenames.append(tempMonthlyGrouping)
+                tempMonthlyGrouping.append(fullFilePath)
+                generatedChartFilePaths.append(tempMonthlyGrouping)
 
                 datetimePreviousFrom = datetimeMonthFrom
 
@@ -207,11 +211,11 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             args = [chart[0], datetimeMonthFrom, datetimeMonthTo, datetimeMonthFromNext, datetimeMonthToNext]
             dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
 
-            chartsGenerated[chartType][chart[2]] = generatedChartFilenames
+            chartsGenerated[chartType][chart[2]] = generatedChartFilePaths
 
 
         elif (chart[2] == 'Quarterly'):
-            generatedChartFilenames = []
+            generatedChartFilePaths = []
 
             datetimeQuaterFrom = chart[5]
             datetimeQuaterTo = chart[6]
@@ -222,6 +226,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             while (datetimeQuaterTo < lastRecord[5]):
                 fileName = f'{chartType.lower()}-plot-{datetimeQuaterFrom:%Y-%m}.png'
                 # fileName = f'{chartType.lower()}-plot-{datetimeQuaterFrom:%Y-%m}.svg'
+                fullFilePath = os.path.join(dir, 'Images', 'quarter', fileName)
 
                 args = [chartType, datetimeQuaterFrom, datetimeQuaterTo]
                 listOfUse = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
@@ -239,14 +244,14 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
                     plotDateFrom=datetimeQuaterFrom,
                     plotDateTo=datetimeQuaterTo,
-                    fileName=(os.path.join(dir, 'Images', 'quarter', fileName)),
+                    fileName=fullFilePath,
                     majorLocatorAxisX=mdates.MonthLocator(),
                     minorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
                     majorFormatterAxisX=mdates.DateFormatter('%b'),
                     minorFormatterAxisX=mdates.DateFormatter('%d')
                 )
 
-                generatedChartFilenames.append(fileName)
+                generatedChartFilePaths.append(fullFilePath)
 
                 # increase values by three months
                 datetimePreviousFrom = datetimeQuaterFrom
@@ -255,10 +260,10 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                 datetimeQuaterTo = addMonthsToDatetime(datetimeQuaterTo, 3)
 
             # save to the charttracker
-            chartsGenerated[chartType][chart[2]] = generatedChartFilenames
+            chartsGenerated[chartType][chart[2]] = generatedChartFilePaths
 
         elif (chart[2] == 'Yearly'):
-            generatedChartFilenames = []
+            generatedChartFilePaths = []
 
             datetimeYearFrom = chart[5]
             datetimeYearTo = chart[6]
@@ -270,6 +275,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             # while (datetimeYearTo < lastRecord[5]):
                 fileName = f'{chartType.lower()}-plot-{datetimeYearFrom:%Y-%m}.png'
                 # fileName = f'{chartType.lower()}-plot-{datetimeYearFrom:%Y-%m}.svg'
+                fullFilePath = os.path.join(dir, 'Images', 'year', fileName)
 
                 args = [chartType, datetimeYearFrom, datetimeYearTo]
                 listOfUse = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
@@ -287,14 +293,14 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
                     plotDateFrom=datetimeYearFrom,
                     plotDateTo=datetimeYearTo,
-                    fileName=(os.path.join(dir, 'Images', 'year', fileName)),
+                    fileName=fullFilePath,
                     majorLocatorAxisX=mdates.MonthLocator(),
                     minorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
                     majorFormatterAxisX=mdates.DateFormatter('%b'),
                     minorFormatterAxisX=mdates.DateFormatter('%d')
                 )
 
-                generatedChartFilenames.append(fileName)
+                generatedChartFilePaths.append(fullFilePath)
 
                 # increase values by three months
                 datetimePreviousFrom = datetimeYearFrom
@@ -303,7 +309,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                 datetimeYearTo = addMonthsToDatetime(datetimeYearTo, 12)
 
             # save to the charttracker
-            chartsGenerated[chartType][chart[2]] = generatedChartFilenames
+            chartsGenerated[chartType][chart[2]] = generatedChartFilePaths
 
     print('Finished!')
     print(chartsGenerated)
