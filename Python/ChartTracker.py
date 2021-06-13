@@ -15,8 +15,7 @@ import GenerateCharts
 
 # def unamedFunctionForNow(dataAccess, config, dir, chartType):
 def generateIfAvailable(dataAccess, config, dir, chartType):
-    chartsGenerated = {}
-    chartsGenerated[chartType] = {}
+    chartsGenerated = []
 
     args = [chartType]
     lastRecord = dataAccess.loadData('spDataValues_SelectLatestSavedRecord', args, 'MySql')[0]
@@ -26,8 +25,6 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
     for chart in chartsToMake:
         if(chart[2] == 'Daily'):
-            generatedChartFilePaths = []
-
             datetimeDayFrom = chart[5]
             datetimeDayTo = chart[6]
 
@@ -57,7 +54,12 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     majorFormatterAxisX=mdates.DateFormatter('%H:%M')
                 )
 
-                generatedChartFilePaths.append(fullFilePath)
+                chartsGenerated.append({
+                    'EnergySource': chartType,
+                    'ChartType': chart[2],
+                    'Files': [fullFilePath],
+                    'Message': 'This is a test message for the #daily chart'
+                })
 
                 datetimeDayFrom += datetime.timedelta(days=1)
                 datetimeDayTo += datetime.timedelta(days=1)
@@ -73,11 +75,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             args = [chart[0], datetimeDayFrom, datetimeDayTo, datetimeDayFromNext, datetimeDayToNext]
             dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
 
-            chartsGenerated[chartType][chart[2]] = generatedChartFilePaths
-
         elif (chart[2] == 'Weekly'):
-            generatedChartFilePaths = []
-
             datetimeWeekFrom = chart[5]
             datetimeWeekTo = chart[6]
             titleDayWeekEnd = datetimeWeekFrom + datetime.timedelta(days=6)
@@ -109,7 +107,12 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     minorFormatterAxisX=mdates.DateFormatter('%H')
                 )
 
-                generatedChartFilePaths.append(fullFilePath)
+                chartsGenerated.append({
+                    'EnergySource': chartType,
+                    'ChartType': chart[2],
+                    'Files': [fullFilePath],
+                    'Message': 'This is a test message for the #weekly chart'
+                })
 
                 datetimeWeekFrom += datetime.timedelta(weeks=1)
                 datetimeWeekTo += datetime.timedelta(weeks=1)
@@ -126,11 +129,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             args = [chart[0], datetimeWeekFrom, datetimeWeekTo, datetimeWeekFromNext, datetimeWeekToNext]
             dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
 
-            chartsGenerated[chartType][chart[2]] = generatedChartFilePaths
-
         elif (chart[2] == 'Monthly'):
-            generatedChartFilePaths = []
-
             datetimeMonthFrom = chart[5]
             datetimeMonthTo = chart[6]
 
@@ -193,7 +192,12 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                 )
 
                 tempMonthlyGrouping.append(fullFilePath)
-                generatedChartFilePaths.append(tempMonthlyGrouping)
+                chartsGenerated.append({
+                    'EnergySource': chartType,
+                    'ChartType': chart[2],
+                    'Files': tempMonthlyGrouping,
+                    'Message': 'This is a test message for the #montly charts'
+                })
 
                 datetimePreviousFrom = datetimeMonthFrom
 
@@ -211,12 +215,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             args = [chart[0], datetimeMonthFrom, datetimeMonthTo, datetimeMonthFromNext, datetimeMonthToNext]
             dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
 
-            chartsGenerated[chartType][chart[2]] = generatedChartFilePaths
-
-
         elif (chart[2] == 'Quarterly'):
-            generatedChartFilePaths = []
-
             datetimeQuarterFrom = chart[5]
             datetimeQuarterTo = chart[6]
 
@@ -253,7 +252,12 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     minorFormatterAxisX=mdates.DateFormatter('%d')
                 )
 
-                generatedChartFilePaths.append(fullFilePath)
+                chartsGenerated.append({
+                    'EnergySource': chartType,
+                    'ChartType': chart[2],
+                    'Files': [fullFilePath],
+                    'Message': 'This is a test message for the #quarterly chart'
+                })
 
                 # increase values by three months
                 datetimePreviousFrom = datetimeQuarterFrom
@@ -264,11 +268,8 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                 titleDayQuarterEnd = datetimeQuarterTo - datetime.timedelta(days=1)
 
             # save to the charttracker
-            chartsGenerated[chartType][chart[2]] = generatedChartFilePaths
 
         elif (chart[2] == 'Yearly'):
-            generatedChartFilePaths = []
-
             datetimeYearFrom = chart[5]
             datetimeYearTo = chart[6]
 
@@ -303,7 +304,12 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     majorFormatterAxisX=mdates.DateFormatter('%b')
                 )
 
-                generatedChartFilePaths.append(fullFilePath)
+                chartsGenerated.append({
+                    'EnergySource': chartType,
+                    'ChartType': chart[2],
+                    'Files': [fullFilePath],
+                    'Message': 'This is a test message for the #yearly chart'
+                })
 
                 # increase values by three months
                 datetimePreviousFrom = datetimeYearFrom
@@ -312,10 +318,8 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                 datetimeYearTo = addMonthsToDatetime(datetimeYearTo, 12)
 
             # save to the charttracker
-            chartsGenerated[chartType][chart[2]] = generatedChartFilePaths
 
     print('Finished!')
-    print(chartsGenerated)
     return chartsGenerated
 
 def addMonthsToDatetime(datetimeVariable, months):
