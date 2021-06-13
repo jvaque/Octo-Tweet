@@ -96,7 +96,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     valuesX=xList,
                     valuesY=yList,
                     chartTitle=(f"{datetimeWeekFrom:%d %b %Y}-{titleDayWeekEnd:%d %b %Y}"),
-                    chartLabelX='Day (h)',
+                    chartLabelX='Day',
                     chartLabelY=f'{chartType} Consumption (kWh)',
                     plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
@@ -152,7 +152,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     valuesX=xList,
                     valuesY=yList,
                     chartTitle=(f"{datetimeMonthFrom:%b %Y}"),
-                    chartLabelX='Month',
+                    chartLabelX='Day',
                     chartLabelY=f'{chartType} Consumption (kWh)',
                     plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
@@ -179,7 +179,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     valuesX=xList,
                     valuesY=yList,
                     chartTitle=(f"{datetimeMonthFrom:%b %Y}"),
-                    chartLabelX='Month',
+                    chartLabelX='Day',
                     chartLabelY=f'{chartType} Daily Consumption (kWh)',
                     plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
@@ -217,18 +217,20 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
         elif (chart[2] == 'Quarterly'):
             generatedChartFilePaths = []
 
-            datetimeQuaterFrom = chart[5]
-            datetimeQuaterTo = chart[6]
+            datetimeQuarterFrom = chart[5]
+            datetimeQuarterTo = chart[6]
 
-            datetimePreviousFrom = datetimeQuaterFrom
+            titleDayQuarterEnd = datetimeQuarterTo - datetime.timedelta(days=1)
+
+            datetimePreviousFrom = datetimeQuarterFrom
             # N = 1 * 24 * 2
 
-            while (datetimeQuaterTo < lastRecord[5]):
-                fileName = f'{chartType.lower()}-plot-{datetimeQuaterFrom:%Y-%m}.png'
-                # fileName = f'{chartType.lower()}-plot-{datetimeQuaterFrom:%Y-%m}.svg'
+            while (datetimeQuarterTo < lastRecord[5]):
+                fileName = f'{chartType.lower()}-plot-{datetimeQuarterFrom:%Y-%m-%d}-{titleDayQuarterEnd:%Y-%m-%d}.png'
+                # fileName = f'{chartType.lower()}-plot-{datetimeQuarterFrom:%Y-%m-%d}-{titleDayQuarterEnd:%Y-%m-%d}.svg'
                 fullFilePath = os.path.join(dir, 'Images', 'quarter', fileName)
 
-                args = [chartType, datetimeQuaterFrom, datetimeQuaterTo]
+                args = [chartType, datetimeQuarterFrom, datetimeQuarterTo]
                 listOfUse = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
                 # xList, yList = applyRollingAverage(listOfUse, N)
                 xList, yList = GenerateCharts.squareData(listOfUse)
@@ -237,13 +239,13 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                 GenerateCharts.customChart(
                     valuesX=xList,
                     valuesY=yList,
-                    chartTitle=(f"{datetimeQuaterFrom:%d %b %Y}-{datetimeQuaterTo:%d %b %Y}"),
-                    chartLabelX='Quater',
-                    chartLabelY=f'{chartType} Consumption (kWh)',
+                    chartTitle=(f"{datetimeQuarterFrom:%d %b %Y}-{titleDayQuarterEnd:%d %b %Y}"),
+                    chartLabelX='Month',
+                    chartLabelY=f'{chartType} Daily Consumption (kWh)',
                     plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
-                    plotDateFrom=datetimeQuaterFrom,
-                    plotDateTo=datetimeQuaterTo,
+                    plotDateFrom=datetimeQuarterFrom,
+                    plotDateTo=datetimeQuarterTo,
                     fileName=fullFilePath,
                     majorLocatorAxisX=mdates.MonthLocator(),
                     minorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
@@ -254,10 +256,12 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                 generatedChartFilePaths.append(fullFilePath)
 
                 # increase values by three months
-                datetimePreviousFrom = datetimeQuaterFrom
+                datetimePreviousFrom = datetimeQuarterFrom
 
-                datetimeQuaterFrom = addMonthsToDatetime(datetimeQuaterFrom, 3)
-                datetimeQuaterTo = addMonthsToDatetime(datetimeQuaterTo, 3)
+                datetimeQuarterFrom = addMonthsToDatetime(datetimeQuarterFrom, 3)
+                datetimeQuarterTo = addMonthsToDatetime(datetimeQuarterTo, 3)
+
+                titleDayQuarterEnd = datetimeQuarterTo - datetime.timedelta(days=1)
 
             # save to the charttracker
             chartsGenerated[chartType][chart[2]] = generatedChartFilePaths
@@ -273,8 +277,8 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
             while (datetimeYearFrom < lastRecord[5]): # Here to generate chart before end of year
             # while (datetimeYearTo < lastRecord[5]):
-                fileName = f'{chartType.lower()}-plot-{datetimeYearFrom:%Y-%m}.png'
-                # fileName = f'{chartType.lower()}-plot-{datetimeYearFrom:%Y-%m}.svg'
+                fileName = f'{chartType.lower()}-plot-{datetimeYearFrom:%Y}.png'
+                # fileName = f'{chartType.lower()}-plot-{datetimeYearFrom:%Y}.svg'
                 fullFilePath = os.path.join(dir, 'Images', 'year', fileName)
 
                 args = [chartType, datetimeYearFrom, datetimeYearTo]
@@ -286,8 +290,8 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                 GenerateCharts.customChart(
                     valuesX=xList,
                     valuesY=yList,
-                    chartTitle=(f"{datetimeYearFrom:%d %b %Y}-{datetimeYearTo:%d %b %Y}"),
-                    chartLabelX='Year',
+                    chartTitle=(f"{datetimeYearFrom:%Y}"),
+                    chartLabelX='Month',
                     chartLabelY=f'{chartType} Daily Consumption (kWh)',
                     plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
