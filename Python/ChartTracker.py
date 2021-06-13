@@ -96,7 +96,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     valuesX=xList,
                     valuesY=yList,
                     chartTitle=(f"{datetimeWeekFrom:%d %b %Y}-{titleDayWeekEnd:%d %b %Y}"),
-                    chartLabelX='Day',
+                    chartLabelX='Day (h)',
                     chartLabelY=f'{chartType} Consumption (kWh)',
                     plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
@@ -152,7 +152,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     valuesX=xList,
                     valuesY=yList,
                     chartTitle=(f"{datetimeMonthFrom:%b %Y}"),
-                    chartLabelX='Day',
+                    chartLabelX='Day (h)',
                     chartLabelY=f'{chartType} Consumption (kWh)',
                     plotColorLine=config['Charts'][f'{chartType.lower()}_color_line'],
                     plotColorFill=config['Charts'][f'{chartType.lower()}_color_fill'],
@@ -300,8 +300,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     fileName=fullFilePath,
                     majorLocatorAxisX=mdates.MonthLocator(),
                     minorLocatorAxisX=mdates.WeekdayLocator(byweekday=mdates.MO),
-                    majorFormatterAxisX=mdates.DateFormatter('%b'),
-                    minorFormatterAxisX=mdates.DateFormatter('%d')
+                    majorFormatterAxisX=mdates.DateFormatter('%b')
                 )
 
                 generatedChartFilePaths.append(fullFilePath)
