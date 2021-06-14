@@ -1,4 +1,5 @@
 import tweepy
+import time
 
 class Tweet:
     def __init__(self, config):
@@ -15,5 +16,16 @@ class Tweet:
     def postStatus(self, status):
         self._api.update_status(status)
 
-    def postMedia(self, imagePath, status):
-        self._api.update_with_media(imagePath, status)
+    def postMedia(self, imagePaths, status):
+        mediaIds = []
+        for imagePath in imagePaths:
+            res = self._api.media_upload(imagePath)
+            mediaIds.append(res.media_id)
+
+        # Tweet with multiple images
+        self._api.update_status(status=status, media_ids=mediaIds)
+
+    def postBatch(self, listDicCharts):
+        for chart in listDicCharts:
+            self.postMedia(chart['Files'], chart['Message'])
+            time.sleep(120)

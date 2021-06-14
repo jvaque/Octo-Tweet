@@ -18,12 +18,6 @@ def manualCharts(config, dir, args):
 def automaticCharts(config, dir, args):
     if(args.lazy):
         print("Will skip generating or tweeting charts")
-    elif(args.tweet):
-        print("Will tweet the charts after generated")
-        chirp = Tweet(config)
-        # chirp.postStatus('This is more testing')
-        chirp.postMedia('D:/Source/Octo-Tweet/Python/Images/month/gas-daily-plot-2020-11.png', 'Testing!!!\nThis is an example of a monthly chart')
-
     elif(args.folders):
         print('Generating the folders for the charts')
         # TODO: Add generate the folders if this flag is set
@@ -35,8 +29,14 @@ def automaticCharts(config, dir, args):
 
         dataAccess = MySqlDataAccess(config)
 
-        ChartTracker.generateIfAvailable(dataAccess, config, dir, 'Electricity')
-        ChartTracker.generateIfAvailable(dataAccess, config, dir, 'Gas')
+        listDicChartsElec = ChartTracker.generateIfAvailable(dataAccess, config, dir, 'Electricity')
+        listDicChartsGas = ChartTracker.generateIfAvailable(dataAccess, config, dir, 'Gas')
+        listDicCharts = listDicChartsElec + listDicChartsGas
+
+        if(args.tweet):
+            print("Tweeting the charts after generating them")
+            chirp = Tweet(config)
+            chirp.postBatch(listDicCharts)
 
 def parseArguments():
     # Create the parser
