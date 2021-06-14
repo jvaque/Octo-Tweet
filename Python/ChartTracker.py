@@ -267,7 +267,16 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
                 titleDayQuarterEnd = datetimeQuarterTo - datetime.timedelta(days=1)
 
-            # save to the charttracker
+            datetimeQuarterFromNext = datetimeQuarterFrom
+            datetimeQuarterToNext = datetimeQuarterTo
+
+            # Decrease as after generating the last chart the datetime values 
+            # would be for the next chart and not the generated ones
+            datetimeQuarterFrom = datetimePreviousFrom
+            datetimeQuarterTo = datetimeQuarterFromNext
+
+            args = [chart[0], datetimeQuarterFrom, datetimeQuarterTo, datetimeQuarterFromNext, datetimeQuarterToNext]
+            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
 
         elif (chart[2] == 'Yearly'):
             datetimeYearFrom = chart[5]
@@ -276,8 +285,8 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             datetimePreviousFrom = datetimeYearFrom
             # N = 1 * 24 * 2
 
-            while (datetimeYearFrom < lastRecord[5]): # Here to generate chart before end of year
-            # while (datetimeYearTo < lastRecord[5]):
+            # while (datetimeYearFrom < lastRecord[5]): # Here to generate chart before end of year
+            while (datetimeYearTo < lastRecord[5]):
                 fileName = f'{chartType.lower()}-plot-{datetimeYearFrom:%Y}.png'
                 # fileName = f'{chartType.lower()}-plot-{datetimeYearFrom:%Y}.svg'
                 fullFilePath = os.path.join(dir, 'Images', 'year', fileName)
@@ -311,13 +320,22 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'Message': 'This is a test message for the #yearly chart'
                 })
 
-                # increase values by three months
+                # increase values by twelve months
                 datetimePreviousFrom = datetimeYearFrom
 
                 datetimeYearFrom = addMonthsToDatetime(datetimeYearFrom, 12)
                 datetimeYearTo = addMonthsToDatetime(datetimeYearTo, 12)
 
-            # save to the charttracker
+            datetimeYearFromNext = datetimeYearFrom
+            datetimeYearToNext = datetimeYearTo
+
+            # Decrease as after generating the last chart the datetime values 
+            # would be for the next chart and not the generated ones
+            datetimeYearFrom = datetimePreviousFrom
+            datetimeYearTo = datetimeYearFromNext
+
+            args = [chart[0], datetimeYearFrom, datetimeYearTo, datetimeYearFromNext, datetimeYearToNext]
+            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
 
     print('Finished!')
     return chartsGenerated
