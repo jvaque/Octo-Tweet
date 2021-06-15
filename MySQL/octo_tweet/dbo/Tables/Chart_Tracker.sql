@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS `octo_tweet`.`Chart_Tracker` (
 
     PRIMARY KEY (`chart_tracker_id`),
     CONSTRAINT FK_dataSource_ChartTracker FOREIGN KEY (`data_source_id`) REFERENCES `Data_Sources`(`data_source_id`),
-    INDEX (`chart_next_to`)
+    INDEX (`chart_next_to`),
+    UNIQUE KEY UC_chart_type (`data_source_id`, `chart_type`)
 ) AUTO_INCREMENT = 1000;
