@@ -28,6 +28,8 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
             datetimeDayFrom = chart[5]
             datetimeDayTo = chart[6]
 
+            datetimePreviousFrom = datetimeDayFrom
+
             while (datetimeDayTo < lastRecord[5]):
                 fileName = f'{chartType.lower()}-plot-{datetimeDayFrom:%Y-%m-%d}.png'
                 # fileName = f'{chartType.lower()}-plot-{datetimeDayFrom:%Y-%m-%d}.svg'
@@ -61,24 +63,19 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'Message': 'This is a test message for the #daily chart'
                 })
 
+                datetimePreviousFrom = datetimeDayFrom
+
                 datetimeDayFrom += datetime.timedelta(days=1)
                 datetimeDayTo += datetime.timedelta(days=1)
 
-            datetimeDayFromNext = datetimeDayFrom
-            datetimeDayToNext = datetimeDayTo
-
-            # Decrease as after generating the last chart the datetime values 
-            # would be for the next chart and not the generated ones
-            datetimeDayFrom -= datetime.timedelta(days=1)
-            datetimeDayTo -= datetime.timedelta(days=1)
-
-            args = [chart[0], datetimeDayFrom, datetimeDayTo, datetimeDayFromNext, datetimeDayToNext]
-            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
+            updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeDayFrom, datetimeDayTo)
 
         elif (chart[2] == 'Weekly'):
             datetimeWeekFrom = chart[5]
             datetimeWeekTo = chart[6]
             titleDayWeekEnd = datetimeWeekFrom + datetime.timedelta(days=6)
+
+            datetimePreviousFrom = datetimeWeekFrom
 
             while (datetimeWeekTo < lastRecord[5]):
                 fileName = f'{chartType.lower()}-plot-{datetimeWeekFrom:%Y-%m-%d}-{titleDayWeekEnd:%Y-%m-%d}.png'
@@ -114,20 +111,13 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'Message': 'This is a test message for the #weekly chart'
                 })
 
+                datetimePreviousFrom = datetimeWeekFrom
+
                 datetimeWeekFrom += datetime.timedelta(weeks=1)
                 datetimeWeekTo += datetime.timedelta(weeks=1)
                 titleDayWeekEnd = datetimeWeekFrom + datetime.timedelta(days=6)
 
-            datetimeWeekFromNext = datetimeWeekFrom
-            datetimeWeekToNext = datetimeWeekTo
-
-            # Decrease as after generating the last chart the datetime values 
-            # would be for the next chart and not the generated ones
-            datetimeWeekFrom -= datetime.timedelta(weeks=1)
-            datetimeWeekTo -= datetime.timedelta(weeks=1)
-
-            args = [chart[0], datetimeWeekFrom, datetimeWeekTo, datetimeWeekFromNext, datetimeWeekToNext]
-            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
+            updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeWeekFrom, datetimeWeekTo)
 
         elif (chart[2] == 'Monthly'):
             datetimeMonthFrom = chart[5]
@@ -204,16 +194,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                 datetimeMonthFrom = addMonthsToDatetime(datetimeMonthFrom, 1)
                 datetimeMonthTo = addMonthsToDatetime(datetimeMonthTo, 1)
 
-            datetimeMonthFromNext = datetimeMonthFrom
-            datetimeMonthToNext = datetimeMonthTo
-
-            # Decrease as after generating the last chart the datetime values 
-            # would be for the next chart and not the generated ones
-            datetimeMonthFrom = datetimePreviousFrom
-            datetimeMonthTo = datetimeMonthFromNext
-
-            args = [chart[0], datetimeMonthFrom, datetimeMonthTo, datetimeMonthFromNext, datetimeMonthToNext]
-            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
+            updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeMonthFrom, datetimeMonthTo)
 
         elif (chart[2] == 'Quarterly'):
             datetimeQuarterFrom = chart[5]
@@ -267,16 +248,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
                 titleDayQuarterEnd = datetimeQuarterTo - datetime.timedelta(days=1)
 
-            datetimeQuarterFromNext = datetimeQuarterFrom
-            datetimeQuarterToNext = datetimeQuarterTo
-
-            # Decrease as after generating the last chart the datetime values 
-            # would be for the next chart and not the generated ones
-            datetimeQuarterFrom = datetimePreviousFrom
-            datetimeQuarterTo = datetimeQuarterFromNext
-
-            args = [chart[0], datetimeQuarterFrom, datetimeQuarterTo, datetimeQuarterFromNext, datetimeQuarterToNext]
-            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
+            updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeQuarterFrom, datetimeQuarterTo)
 
         elif (chart[2] == 'Yearly'):
             datetimeYearFrom = chart[5]
@@ -326,16 +298,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                 datetimeYearFrom = addMonthsToDatetime(datetimeYearFrom, 12)
                 datetimeYearTo = addMonthsToDatetime(datetimeYearTo, 12)
 
-            datetimeYearFromNext = datetimeYearFrom
-            datetimeYearToNext = datetimeYearTo
-
-            # Decrease as after generating the last chart the datetime values 
-            # would be for the next chart and not the generated ones
-            datetimeYearFrom = datetimePreviousFrom
-            datetimeYearTo = datetimeYearFromNext
-
-            args = [chart[0], datetimeYearFrom, datetimeYearTo, datetimeYearFromNext, datetimeYearToNext]
-            dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
+            updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeYearFrom, datetimeYearTo)
 
     print('Finished!')
     return chartsGenerated
@@ -355,3 +318,18 @@ def addMonthsToDatetime(datetimeVariable, months):
         year +=1
     
     return datetime.datetime(year, month, 1)
+
+def updateChartsGenerated(dataAccess, chartTrackerId, datetimePreviousFrom, datetimeFrom, datetimeTo):
+    # What are passed in as datetimeFrom and datetimeTo are in fact the values 
+    # of the next charts to be generated
+    datetimeFromNext = datetimeFrom
+    datetimeToNext = datetimeTo
+
+    # To get the values of the last chart generated use the datetimePreviousFrom
+    # and the fact that the end timeframe is the start timeframe for the next
+    # chart.
+    datetimeFrom = datetimePreviousFrom
+    datetimeTo = datetimeFromNext
+
+    args = [chartTrackerId, datetimeFrom, datetimeTo, datetimeFromNext, datetimeToNext]
+    dataAccess.saveData('spChartTracker_UpdateTimePeriods', args, 'MySql')
