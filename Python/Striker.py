@@ -7,6 +7,7 @@ import datetime
 import ChartTracker
 from MySqlDataAccess import MySqlDataAccess
 from Tweet import Tweet
+from GenerateCharts import makeImagesFoldersIfMissing
 
 import mysqlRetrieveTest # This name is only temporary
 
@@ -21,7 +22,7 @@ def automaticCharts(config, dir, args):
     elif(args.folders):
         print('Generating the folders for the charts')
         # TODO: Add generate the folders if this flag is set
-        mysqlRetrieveTest.makeImagesFoldersIfMissing(dir)
+        makeImagesFoldersIfMissing(dir)
     else:
         print("Will just generate the charts")
         # Maybe only run this if a specific flag is passed in so that it isn't 
