@@ -12,5 +12,6 @@ GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spDataValues_SelectDailyConsumptionFrom
 GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spDataValues_SelectFirstSavedRecord` TO 'octo_tweet_sp'@'localhost';
 GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spDataValues_SelectLatestSavedRecord` TO 'octo_tweet_sp'@'localhost';
 GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spDataValues_SelectRecordsFromRange` TO 'octo_tweet_sp'@'localhost';
+GRANT EXECUTE ON PROCEDURE `octo_tweet`.`spDataValues_SelectTotalConsumptionFromRange` TO 'octo_tweet_sp'@'localhost';
 
 FLUSH PRIVILEGES;
