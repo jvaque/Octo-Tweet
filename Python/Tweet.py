@@ -3,10 +3,12 @@ import time
 
 class Tweet:
     def __init__(self, config):
-        consumer_key = config['TwitterApi']['consumer_key']
-        consumer_secret = config['TwitterApi']['consumer_secret']
-        access_token = config['TwitterApi']['access_token']
-        access_token_secret = config['TwitterApi']['token_secret']
+        self.delay = config['Twitter']['delay']
+
+        consumer_key = config['Twitter']['TwitterApi']['consumer_key']
+        consumer_secret = config['Twitter']['TwitterApi']['consumer_secret']
+        access_token = config['Twitter']['TwitterApi']['access_token']
+        access_token_secret = config['Twitter']['TwitterApi']['token_secret']
 
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
@@ -28,4 +30,4 @@ class Tweet:
     def postBatch(self, listDicCharts):
         for chart in listDicCharts:
             self.postMedia(chart['Files'], chart['Message'])
-            time.sleep(120)
+            time.sleep(self.delay)
