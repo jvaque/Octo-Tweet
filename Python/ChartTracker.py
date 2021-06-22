@@ -37,7 +37,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
                 args = [chartType, datetimeDayFrom, datetimeDayTo]
                 listOfUse = dataAccess.loadData('spDataValues_SelectRecordsFromRange', args, 'MySql')
-                totalConsumptionForInterval = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
+                totalConsumptionForInterval = dataAccess.loadData('spDataValues_SelectTotalConsumptionFromRange', args, 'MySql')[0]
                 xList, yList = GenerateCharts.squareData(listOfUse)
 
                 # Create and save a copy of the daily chart
@@ -61,7 +61,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'EnergySource': chartType,
                     'ChartType': chart[2],
                     'Files': [fullFilePath],
-                    'Message': f'{chartType} {datetimeDayFrom:%d-%m-%Y} consumption. \nTotal daily {chartType} consumption: {totalConsumptionForInterval[2]:.3f}kWh\n\n#OctopusSmartDayCharts\n#{chartType}DayCharts'
+                    'Message': f'{chartType} {datetimeDayFrom:%d-%m-%Y} consumption. \nTotal daily {chartType} consumption: {totalConsumptionForInterval[2]:.3f}kWh\n\n#OctopusSmartDayCharts\n#Octopus{chartType}DayCharts'
                 })
 
                 datetimePreviousFrom = datetimeDayFrom
@@ -85,7 +85,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
                 args = [chartType, datetimeWeekFrom, datetimeWeekTo]
                 listOfUse = dataAccess.loadData('spDataValues_SelectRecordsFromRange', args, 'MySql')
-                totalConsumptionForInterval = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
+                totalConsumptionForInterval = dataAccess.loadData('spDataValues_SelectTotalConsumptionFromRange', args, 'MySql')[0]
                 xList, yList = GenerateCharts.squareData(listOfUse)
 
                 # Create and save a copy of the weekly chart
@@ -110,7 +110,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'EnergySource': chartType,
                     'ChartType': chart[2],
                     'Files': [fullFilePath],
-                    'Message': f'{chartType} {datetimeWeekFrom:%d-%m-%Y} to {titleDayWeekEnd:%d-%m-%Y} consumption. \nTotal weekly {chartType} consumption: {totalConsumptionForInterval[2]:.3f}kWh\n\n#OctopusSmartWeekCharts\n#{chartType}WeekCharts'
+                    'Message': f'{chartType} {datetimeWeekFrom:%d-%m-%Y} to {titleDayWeekEnd:%d-%m-%Y} consumption. \nTotal weekly {chartType} consumption: {totalConsumptionForInterval[2]:.3f}kWh\n\n#OctopusSmartWeekCharts\n#Octopus{chartType}WeekCharts'
                 })
 
                 datetimePreviousFrom = datetimeWeekFrom
@@ -136,7 +136,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
                 args = [chartType, datetimeMonthFrom, datetimeMonthTo]
                 listOfUse = dataAccess.loadData('spDataValues_SelectRecordsFromRange', args, 'MySql')
-                totalConsumptionForInterval = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
+                totalConsumptionForInterval = dataAccess.loadData('spDataValues_SelectTotalConsumptionFromRange', args, 'MySql')[0]
                 xList, yList = GenerateCharts.squareData(listOfUse)
 
                 # Create and save a copy of the montly chart
@@ -189,7 +189,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'EnergySource': chartType,
                     'ChartType': chart[2],
                     'Files': tempMonthlyGrouping,
-                    'Message': f'{chartType} {datetimeMonthFrom:%b %Y} consumption. \nTotal monthly {chartType} consumption: {totalConsumptionForInterval[2]:.3f}kWh\n\n#OctopusSmartMonthCharts\n#{chartType}MonthCharts'
+                    'Message': f'{chartType} {datetimeMonthFrom:%b %Y} consumption. \nTotal monthly {chartType} consumption: {totalConsumptionForInterval[2]:.3f}kWh\n\n#OctopusSmartMonthCharts\n#Octopus{chartType}MonthCharts'
                 })
 
                 datetimePreviousFrom = datetimeMonthFrom
@@ -215,7 +215,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
                 args = [chartType, datetimeQuarterFrom, datetimeQuarterTo]
                 listOfUse = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
-                totalConsumptionForInterval = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
+                totalConsumptionForInterval = dataAccess.loadData('spDataValues_SelectTotalConsumptionFromRange', args, 'MySql')[0]
                 # xList, yList = applyRollingAverage(listOfUse, N)
                 xList, yList = GenerateCharts.squareData(listOfUse)
 
@@ -241,7 +241,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'EnergySource': chartType,
                     'ChartType': chart[2],
                     'Files': [fullFilePath],
-                    'Message': f'{chartType} {datetimeQuarterFrom:%d-%m-%Y} to {titleDayQuarterEnd:%d-%m-%Y} consumption. \nTotal quarter {chartType} consumption: {totalConsumptionForInterval[2]:.3f}kWh\n\n#OctopusSmartQuarterCharts\n#{chartType}QuarterCharts'
+                    'Message': f'{chartType} {datetimeQuarterFrom:%d-%m-%Y} to {titleDayQuarterEnd:%d-%m-%Y} consumption. \nTotal quarter {chartType} consumption: {totalConsumptionForInterval[2]:.3f}kWh\n\n#OctopusSmartQuarterCharts\n#Octopus{chartType}QuarterCharts'
                 })
 
                 # increase values by three months
@@ -269,7 +269,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
                 args = [chartType, datetimeYearFrom, datetimeYearTo]
                 listOfUse = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
-                totalConsumptionForInterval = dataAccess.loadData('spDataValues_SelectDailyConsumptionFromRange', args, 'MySql')
+                totalConsumptionForInterval = dataAccess.loadData('spDataValues_SelectTotalConsumptionFromRange', args, 'MySql')[0]
                 # xList, yList = applyRollingAverage(listOfUse, N)
                 xList, yList = GenerateCharts.squareData(listOfUse)
 
@@ -294,7 +294,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'EnergySource': chartType,
                     'ChartType': chart[2],
                     'Files': [fullFilePath],
-                    'Message': f'{chartType} {datetimeYearFrom:%Y} consumption. \nTotal year {chartType} consumption: {totalConsumptionForInterval[2]:.3f}kWh\n\n#OctopusSmartYearCharts\n#{chartType}YearCharts'
+                    'Message': f'{chartType} {datetimeYearFrom:%Y} consumption. \nTotal year {chartType} consumption: {totalConsumptionForInterval[2]:.3f}kWh\n\n#OctopusSmartYearCharts\n#Octopus{chartType}YearCharts'
                 })
 
                 # increase values by twelve months
