@@ -10,13 +10,8 @@ CREATE PROCEDURE `octo_tweet`.`spDataValues_SelectTotalConsumptionFromRange`(
 BEGIN
 
     SELECT
-        `data_value_id`,
         `Data_Values`.`data_source_id`,
-        SUM(`data_value`),
-        MIN(`data_interval_start_datetime`),
-        `data_interval_start_offset`,
-        MAX(`data_interval_end_datetime`),
-        `data_interval_end_offset`
+        SUM(`data_value`)
     FROM
         `Data_Values`
     LEFT JOIN `Data_Sources` ON
