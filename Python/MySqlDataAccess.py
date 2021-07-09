@@ -6,11 +6,7 @@ class MySqlDataAccess:
 
     def loadData(self, storedProcedureName, args, connectionStringName):
         try:
-            cnx = mysql.connector.connect(
-                user=self._config[connectionStringName]['user_name'],
-                password=self._config[connectionStringName]['password'],
-                host=self._config[connectionStringName]['host'],
-                database=self._config[connectionStringName]['database_name'])
+            cnx = mysql.connector.connect(**self._config[connectionStringName])
 
             cursor = cnx.cursor()
 
@@ -27,11 +23,7 @@ class MySqlDataAccess:
 
     def saveData(self, storedProcedureName, args, connectionStringName):
         try:
-            cnx = mysql.connector.connect(
-                user=self._config[connectionStringName]['user_name'],
-                password=self._config[connectionStringName]['password'],
-                host=self._config[connectionStringName]['host'],
-                database=self._config[connectionStringName]['database_name'])
+            cnx = mysql.connector.connect(**self._config[connectionStringName])
 
             cursor = cnx.cursor()
 
