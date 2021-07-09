@@ -61,7 +61,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'EnergySource': chartType,
                     'ChartType': chart[2],
                     'Files': [fullFilePath],
-                    'Message': f'{chartType} {datetimeDayFrom:%d-%m-%Y} consumption. \nTotal daily {chartType} consumption: {totalConsumptionForInterval[1]:.3f}kWh\n\n#OctopusSmartDayCharts\n#Octopus{chartType}DayCharts'
+                    'Message': f'{chartType} {datetimeDayFrom:%d-%m-%Y} consumption. \nTotal daily {chartType} consumption: {totalConsumptionForInterval[0]:.3f}kWh\n\n#OctopusSmartDayCharts\n#Octopus{chartType}DayCharts'
                 })
 
                 datetimePreviousFrom = datetimeDayFrom
@@ -110,7 +110,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'EnergySource': chartType,
                     'ChartType': chart[2],
                     'Files': [fullFilePath],
-                    'Message': f'{chartType} {datetimeWeekFrom:%d-%m-%Y} to {titleDayWeekEnd:%d-%m-%Y} consumption. \nTotal weekly {chartType} consumption: {totalConsumptionForInterval[1]:.3f}kWh\n\n#OctopusSmartWeekCharts\n#Octopus{chartType}WeekCharts'
+                    'Message': f'{chartType} {datetimeWeekFrom:%d-%m-%Y} to {titleDayWeekEnd:%d-%m-%Y} consumption. \nTotal weekly {chartType} consumption: {totalConsumptionForInterval[0]:.3f}kWh\n\n#OctopusSmartWeekCharts\n#Octopus{chartType}WeekCharts'
                 })
 
                 datetimePreviousFrom = datetimeWeekFrom
@@ -189,7 +189,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'EnergySource': chartType,
                     'ChartType': chart[2],
                     'Files': tempMonthlyGrouping,
-                    'Message': f'{chartType} {datetimeMonthFrom:%b %Y} consumption. \nTotal monthly {chartType} consumption: {totalConsumptionForInterval[1]:.3f}kWh\n\n#OctopusSmartMonthCharts\n#Octopus{chartType}MonthCharts'
+                    'Message': f'{chartType} {datetimeMonthFrom:%b %Y} consumption. \nTotal monthly {chartType} consumption: {totalConsumptionForInterval[0]:.3f}kWh\n\n#OctopusSmartMonthCharts\n#Octopus{chartType}MonthCharts'
                 })
 
                 datetimePreviousFrom = datetimeMonthFrom
@@ -241,7 +241,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'EnergySource': chartType,
                     'ChartType': chart[2],
                     'Files': [fullFilePath],
-                    'Message': f'{chartType} {datetimeQuarterFrom:%d-%m-%Y} to {titleDayQuarterEnd:%d-%m-%Y} consumption. \nTotal quarter {chartType} consumption: {totalConsumptionForInterval[1]:.3f}kWh\n\n#OctopusSmartQuarterCharts\n#Octopus{chartType}QuarterCharts'
+                    'Message': f'{chartType} {datetimeQuarterFrom:%d-%m-%Y} to {titleDayQuarterEnd:%d-%m-%Y} consumption. \nTotal quarter {chartType} consumption: {totalConsumptionForInterval[0]:.3f}kWh\n\n#OctopusSmartQuarterCharts\n#Octopus{chartType}QuarterCharts'
                 })
 
                 # increase values by three months
@@ -294,7 +294,7 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
                     'EnergySource': chartType,
                     'ChartType': chart[2],
                     'Files': [fullFilePath],
-                    'Message': f'{chartType} {datetimeYearFrom:%Y} consumption. \nTotal year {chartType} consumption: {totalConsumptionForInterval[1]:.3f}kWh\n\n#OctopusSmartYearCharts\n#Octopus{chartType}YearCharts'
+                    'Message': f'{chartType} {datetimeYearFrom:%Y} consumption. \nTotal year {chartType} consumption: {totalConsumptionForInterval[0]:.3f}kWh\n\n#OctopusSmartYearCharts\n#Octopus{chartType}YearCharts'
                 })
 
                 # increase values by twelve months

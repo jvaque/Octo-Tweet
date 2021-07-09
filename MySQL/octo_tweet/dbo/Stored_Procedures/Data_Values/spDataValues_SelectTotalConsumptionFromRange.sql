@@ -10,7 +10,6 @@ CREATE PROCEDURE `octo_tweet`.`spDataValues_SelectTotalConsumptionFromRange`(
 BEGIN
 
     SELECT
-        `Data_Values`.`data_source_id`,
         SUM(`data_value`)
     FROM
         `Data_Values`
