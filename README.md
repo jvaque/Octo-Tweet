@@ -30,3 +30,69 @@ Makes sure that the folders the program need to run are in place, if they are no
 ## Other notes:
 
 The charts added are Daily, Weekly, Monthly, Quaterly and Yearly (planning on adding a Rolling_Yearly chart in the future), all of the charts take in data from their selective time periods but both the Quaterly and Yearly chart take in extra data from both ends in order to produce a better looking chart once the rolling average is applied.
+
+## Deployment instructions
+
+Have a computer running linux, either personal or a cloud virtual compute instance.
+
+SSH into it
+
+`ssh -i ".ssh/personal-ec2-key.pem" ubuntu@ec2-18-132-1-123.eu-west-2.compute.amazonaws.com`
+
+Update packages
+
+```
+sudo apt update
+sudo apt upgrade
+```
+
+Install MySql
+
+```
+cd /tmp
+curl -OL https://dev.mysql.com/get/mysql-apt-config_0.8.17-1_all.deb
+```
+
+Check checksum
+
+```
+md5sum mysql-apt-config_0.8.17-1_all.deb
+```
+
+```
+sudo dpkg -i mysql-apt-config*
+```
+
+
+```
+sudo apt update
+rm mysql-apt-config*
+sudo apt install mysql-server
+
+sudo apt install mysql-server
+```
+
+```
+mysql_secure_installation
+
+```
+
+Change appsettings
+publish app
+run app with -a followed with -c
+
+
+use the virtual environmetn
+pip3 install -r requirements.txt
+
+make sure to make shell script executable with 
+```
+chmod +x filename
+```
+
+Configure crontab
+```
+crontab -e
+
+0 6 * * * /home/ubuntu/Octo-Tweet/Ace.sh >> /home/ubuntu/Octo-Tweet/Ace.log
+```
