@@ -305,8 +305,99 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
 
             updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeYearFrom, datetimeYearTo)
 
-    print('Finished!')
+    print(f'Finished generating all available charts for {chartType}!')
     return chartsGenerated
+
+def updateTrackerToLastAvailable(dataAccess, config, dir, chartType):
+    args = [chartType]
+    lastRecord = dataAccess.loadData('spDataValues_SelectLatestSavedRecord', args, 'MySql')[0]
+
+    args = [chartType, lastRecord[5]]
+    chartsToMake = dataAccess.loadData('spChartTracker_SelectChartsToMake', args, 'MySql')
+
+    for chart in chartsToMake:
+        if(chart[2] == 'Daily'):
+            datetimeDayFrom = chart[5]
+            datetimeDayTo = chart[6]
+
+            datetimePreviousFrom = datetimeDayFrom
+
+            while (datetimeDayTo < lastRecord[5]):
+                datetimePreviousFrom = datetimeDayFrom
+
+                datetimeDayFrom += datetime.timedelta(days=1)
+                datetimeDayTo += datetime.timedelta(days=1)
+
+            updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeDayFrom, datetimeDayTo)
+
+        elif (chart[2] == 'Weekly'):
+            datetimeWeekFrom = chart[5]
+            datetimeWeekTo = chart[6]
+            titleDayWeekEnd = datetimeWeekFrom + datetime.timedelta(days=6)
+
+            datetimePreviousFrom = datetimeWeekFrom
+
+            while (datetimeWeekTo < lastRecord[5]):
+                datetimePreviousFrom = datetimeWeekFrom
+
+                datetimeWeekFrom += datetime.timedelta(weeks=1)
+                datetimeWeekTo += datetime.timedelta(weeks=1)
+                titleDayWeekEnd = datetimeWeekFrom + datetime.timedelta(days=6)
+
+            updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeWeekFrom, datetimeWeekTo)
+
+        elif (chart[2] == 'Monthly'):
+            datetimeMonthFrom = chart[5]
+            datetimeMonthTo = chart[6]
+
+            datetimePreviousFrom = datetimeMonthFrom
+
+            while (datetimeMonthTo < lastRecord[5]):
+                datetimePreviousFrom = datetimeMonthFrom
+
+                datetimeMonthFrom = addMonthsToDatetime(datetimeMonthFrom, 1)
+                datetimeMonthTo = addMonthsToDatetime(datetimeMonthTo, 1)
+
+            updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeMonthFrom, datetimeMonthTo)
+
+        elif (chart[2] == 'Quarterly'):
+            datetimeQuarterFrom = chart[5]
+            datetimeQuarterTo = chart[6]
+
+            titleDayQuarterEnd = datetimeQuarterTo - datetime.timedelta(days=1)
+
+            datetimePreviousFrom = datetimeQuarterFrom
+            # N = 1 * 24 * 2
+
+            while (datetimeQuarterTo < lastRecord[5]):
+                # increase values by three months
+                datetimePreviousFrom = datetimeQuarterFrom
+
+                datetimeQuarterFrom = addMonthsToDatetime(datetimeQuarterFrom, 3)
+                datetimeQuarterTo = addMonthsToDatetime(datetimeQuarterTo, 3)
+
+                titleDayQuarterEnd = datetimeQuarterTo - datetime.timedelta(days=1)
+
+            updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeQuarterFrom, datetimeQuarterTo)
+
+        elif (chart[2] == 'Yearly'):
+            datetimeYearFrom = chart[5]
+            datetimeYearTo = chart[6]
+
+            # datetimePreviousFrom = datetimeYearFrom
+            # N = 1 * 24 * 2
+
+            # while (datetimeYearFrom < lastRecord[5]): # Here to generate chart before end of year
+            while (datetimeYearTo < lastRecord[5]):
+                # increase values by twelve months
+                datetimePreviousFrom = datetimeYearFrom
+
+                datetimeYearFrom = addMonthsToDatetime(datetimeYearFrom, 12)
+                datetimeYearTo = addMonthsToDatetime(datetimeYearTo, 12)
+
+            updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeYearFrom, datetimeYearTo)
+
+    print(f'Updated Chart_Tracker to last available for all {chartType} charts!')
 
 def addMonthsToDatetime(datetimeVariable, months):
     year = datetimeVariable.year

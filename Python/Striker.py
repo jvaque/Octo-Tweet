@@ -18,7 +18,12 @@ def manualCharts(config, dir, args):
 
 def automaticCharts(config, dir, args):
     if(args.lazy):
-        print("Will skip generating or tweeting charts")
+        print("Will skip generating or tweeting charts but will update the chart tracker")
+        dataAccess = MySqlDataAccess(config)
+
+        ChartTracker.updateTrackerToLastAvailable(dataAccess, config, dir, 'Electricity')
+        ChartTracker.updateTrackerToLastAvailable(dataAccess, config, dir, 'Gas')
+
     elif(args.folders):
         print('Generating the folders for the charts')
         # TODO: Add generate the folders if this flag is set
