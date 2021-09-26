@@ -77,8 +77,22 @@ mysql_secure_installation
 
 ```
 
-Change appsettings
-publish app
+Install .net core
+
+Change appsettings and mysql user passwords
+
+Run python database builder script
+Log in to mysql and run the output from said script
+> Look into being able to just deploy it from running the python program
+
+
+> All of the following settup could be automated with a shell script
+
+publish c# app
+```
+dotnet publish ./Quarterback/Quarterback.csproj -c Release -o ./publish
+```
+
 run app with -a followed with -c
 
 
