@@ -9,8 +9,6 @@ from MySqlDataAccess import MySqlDataAccess
 from Tweet import Tweet
 from GenerateCharts import makeImagesFoldersIfMissing
 
-import mysqlRetrieveTest # This name is only temporary
-
 def manualCharts(config, dir, args):
     if(args.charts != None):
         for chart in args.charts:
@@ -23,7 +21,6 @@ def automaticCharts(config, dir, args):
 
         ChartTracker.updateTrackerToLastAvailable(dataAccess, config, dir, 'Electricity')
         ChartTracker.updateTrackerToLastAvailable(dataAccess, config, dir, 'Gas')
-
     elif(args.folders):
         print('Generating the folders for the charts')
         # TODO: Add generate the folders if this flag is set

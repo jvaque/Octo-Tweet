@@ -4,17 +4,13 @@ import matplotlib.dates as mdates
 
 import GenerateCharts
 
-
-# Function to return what charts to make
-# Then look through results and check which ones to make
-# Foreach:
-    # Retrieve data neccesary for chart
-    # Generate chart
-    # (Tweet)
-    # Update database record of charts to make
-
-# def unamedFunctionForNow(dataAccess, config, dir, chartType):
 def generateIfAvailable(dataAccess, config, dir, chartType):
+    '''
+    Given the chart type generate all the missing charts and update the missing 
+    charts, when the function finishes a list of all the charts generated will
+    be returned.
+    '''
+
     chartsGenerated = []
 
     args = [chartType]
@@ -309,6 +305,11 @@ def generateIfAvailable(dataAccess, config, dir, chartType):
     return chartsGenerated
 
 def updateTrackerToLastAvailable(dataAccess, config, dir, chartType):
+    '''
+    Update the Chart_Tracker as if all posible charts had been generated for the
+    given chart type
+    '''
+
     args = [chartType]
     lastRecord = dataAccess.loadData('spDataValues_SelectLatestSavedRecord', args, 'MySql')[0]
 
@@ -333,7 +334,6 @@ def updateTrackerToLastAvailable(dataAccess, config, dir, chartType):
         elif (chart[2] == 'Weekly'):
             datetimeWeekFrom = chart[5]
             datetimeWeekTo = chart[6]
-            titleDayWeekEnd = datetimeWeekFrom + datetime.timedelta(days=6)
 
             datetimePreviousFrom = datetimeWeekFrom
 
@@ -342,7 +342,6 @@ def updateTrackerToLastAvailable(dataAccess, config, dir, chartType):
 
                 datetimeWeekFrom += datetime.timedelta(weeks=1)
                 datetimeWeekTo += datetime.timedelta(weeks=1)
-                titleDayWeekEnd = datetimeWeekFrom + datetime.timedelta(days=6)
 
             updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeWeekFrom, datetimeWeekTo)
 
@@ -364,10 +363,7 @@ def updateTrackerToLastAvailable(dataAccess, config, dir, chartType):
             datetimeQuarterFrom = chart[5]
             datetimeQuarterTo = chart[6]
 
-            titleDayQuarterEnd = datetimeQuarterTo - datetime.timedelta(days=1)
-
             datetimePreviousFrom = datetimeQuarterFrom
-            # N = 1 * 24 * 2
 
             while (datetimeQuarterTo < lastRecord[5]):
                 # increase values by three months
@@ -376,18 +372,14 @@ def updateTrackerToLastAvailable(dataAccess, config, dir, chartType):
                 datetimeQuarterFrom = addMonthsToDatetime(datetimeQuarterFrom, 3)
                 datetimeQuarterTo = addMonthsToDatetime(datetimeQuarterTo, 3)
 
-                titleDayQuarterEnd = datetimeQuarterTo - datetime.timedelta(days=1)
-
             updateChartsGenerated(dataAccess, chart[0], datetimePreviousFrom, datetimeQuarterFrom, datetimeQuarterTo)
 
         elif (chart[2] == 'Yearly'):
             datetimeYearFrom = chart[5]
             datetimeYearTo = chart[6]
 
-            # datetimePreviousFrom = datetimeYearFrom
-            # N = 1 * 24 * 2
+            datetimePreviousFrom = datetimeYearFrom
 
-            # while (datetimeYearFrom < lastRecord[5]): # Here to generate chart before end of year
             while (datetimeYearTo < lastRecord[5]):
                 # increase values by twelve months
                 datetimePreviousFrom = datetimeYearFrom
